@@ -11,8 +11,8 @@ interface HeaderProps {
   onToday: () => void;
   theme: "light" | "dark" | "midnight";
   onToggleTheme: () => void;
-  view: "log" | "board" | "projects";
-  onViewChange: (view: "log" | "board" | "projects") => void;
+  view: "log" | "board" | "projects" | "cli" | "about";
+  onViewChange: (view: "log" | "board" | "projects" | "cli" | "about") => void;
 }
 
 export function Header({
@@ -62,6 +62,19 @@ export function Header({
             onClick={() => onViewChange("projects")}
           >
             sProjects
+          </button>
+          <span className="view-tab-divider" />
+          <button
+            className={`view-tab ${view === "cli" ? "active" : ""}`}
+            onClick={() => onViewChange("cli")}
+          >
+            CLI
+          </button>
+          <button
+            className={`view-tab ${view === "about" ? "active" : ""}`}
+            onClick={() => onViewChange("about")}
+          >
+            ?
           </button>
         </div>
         <div className="week-nav">

@@ -61,6 +61,7 @@ pub struct Entry {
     pub area: Option<TaskArea>,
     pub output: Option<String>,
     pub notes: Option<String>,
+    pub synced: bool,
 }
 
 /// Input for creating a new entry

@@ -1,4 +1,5 @@
 import { getWeekDates, formatDate, formatWeekday, formatShortDate, isToday, isWeekend } from "../lib/dates";
+import { toggleSynced } from "../lib/commands";
 import { AREA_LABELS } from "../lib/types";
 import type { Entry, TaskArea } from "../lib/types";
 import "./Timeline.css";
@@ -8,10 +9,11 @@ interface TimelineProps {
   week: number;
   entries: Entry[];
   onDayClick: (date: string) => void;
+  onUpdate: () => void;
   loading: boolean;
 }
 
-export function Timeline({ year, week, entries, onDayClick, loading }: TimelineProps) {
+export function Timeline({ year, week, entries, onDayClick, onUpdate, loading }: TimelineProps) {
   const dates = getWeekDates(year, week);
 
   if (loading) {
@@ -51,7 +53,7 @@ export function Timeline({ year, week, entries, onDayClick, loading }: TimelineP
             {dayEntries.length > 0 ? (
               <div className="day-entries">
                 {dayEntries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} />
+                  <EntryCard key={entry.id} entry={entry} onUpdate={onUpdate} />
                 ))}
               </div>
             ) : (
@@ -68,13 +70,26 @@ export function Timeline({ year, week, entries, onDayClick, loading }: TimelineP
   );
 }
 
-function EntryCard({ entry }: { entry: Entry }) {
+function EntryCard({ entry, onUpdate }: { entry: Entry; onUpdate: () => void }) {
   const areaClass = entry.area ?? "";
   const areaLabel = entry.area ? AREA_LABELS[entry.area as TaskArea] : null;
 
+  const handleSync = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await toggleSynced(entry.id);
+    onUpdate();
+  };
+
   return (
-    <div className={`entry-card area-left-${areaClass}`}>
+    <div className={`entry-card area-left-${areaClass} ${entry.synced ? "is-synced" : ""}`}>
       <div className="entry-main">
+        <button
+          className={`entry-sync-btn ${entry.synced ? "synced" : ""}`}
+          onClick={handleSync}
+          title={entry.synced ? "Synced" : "Mark as synced"}
+        >
+          {entry.synced ? "\u2713" : ""}
+        </button>
         <div className="entry-info">
           <div className="entry-top-line">
             {entry.project && (

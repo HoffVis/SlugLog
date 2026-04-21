@@ -3,7 +3,7 @@ use chrono::Datelike;
 use slog_core::{Database, NewEntry, TaskArea};
 
 #[derive(Parser)]
-#[command(name = "slog", about = "SlugLog — Dev Journal & Timetracker CLI")]
+#[command(name = "slug", about = "SlugLog — Dev Journal & Timetracker CLI")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

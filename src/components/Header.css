@@ -169,6 +169,13 @@
   box-shadow: var(--shadow-card);
 }
 
+.view-tab-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subtle);
+  margin: 0 2px;
+}
+
 .s-prefix {
   opacity: 0.35;
   font-weight: 700;

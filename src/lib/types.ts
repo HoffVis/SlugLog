@@ -18,6 +18,7 @@ export interface Entry {
   area: TaskArea | null;
   output: string | null;
   notes: string | null;
+  synced: boolean;
 }
 
 export interface WeekSummary {

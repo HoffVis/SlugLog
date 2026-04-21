@@ -1,0 +1,52 @@
+#!/bin/bash
+# slug-init — Add SlugLog CLI instructions to the current project's CLAUDE.md
+# Usage: Run slug-init in any project folder
+
+CLAUDE_MD="CLAUDE.md"
+MARKER="## Work Logging (SlugLog)"
+
+# Check if already added
+if [ -f "$CLAUDE_MD" ] && grep -q "$MARKER" "$CLAUDE_MD"; then
+    echo "SlugLog instructions already in $CLAUDE_MD — skipping."
+    exit 0
+fi
+
+# Build the block line by line to avoid heredoc escaping issues
+SLUG_BLOCK=""
+SLUG_BLOCK="${SLUG_BLOCK}
+## Work Logging (SlugLog)
+
+Log your work using the slug command. Use timers so you don't have to guess hours.
+
+### Timer workflow (preferred)
+
+    slug start \"Task description\"                          # Start timer
+    slug start \"Task description\" --project \"Project Name\" # With project
+    slug stop                                              # Stop timer, auto-logs hours
+    slug status                                            # Check what is running
+
+- Starting a new task auto-stops and logs the previous one
+- Hours are calculated from elapsed time and slug-budgeted to fit an 8h day
+- Always run slug stop before ending a session
+
+### Quick log (when you know the hours)
+
+    slug log \"What you did\" 1.5
+    slug log \"Fixed bug\" 2.0 --project \"Project Name\" --pn 6003 --area bug
+
+Areas: programming, testing, bug, meeting, documenting, investigating
+
+### View entries
+
+    slug today    # Todays entries
+    slug week     # This weeks summary
+"
+
+if [ -f "$CLAUDE_MD" ]; then
+    echo "$SLUG_BLOCK" >> "$CLAUDE_MD"
+    echo "Added SlugLog instructions to existing $CLAUDE_MD"
+else
+    echo "# $(basename "$(pwd)")" > "$CLAUDE_MD"
+    echo "$SLUG_BLOCK" >> "$CLAUDE_MD"
+    echo "Created $CLAUDE_MD with SlugLog instructions"
+fi

@@ -7,6 +7,8 @@ import { Sidebar } from "./components/Sidebar";
 import { DayDetail } from "./components/DayDetail";
 import { Board } from "./components/Board";
 import { Projects } from "./components/Projects";
+import { CliPage } from "./components/CliPage";
+import { About } from "./components/About";
 import { SlugReminder } from "./components/SlugReminder";
 import { TrayPopup } from "./components/TrayPopup";
 import { getISOWeek } from "./lib/dates";
@@ -28,7 +30,7 @@ export default function App() {
   const [summary, setSummary] = useState<WeekSummary | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"log" | "board" | "projects">("log");
+  const [view, setView] = useState<"log" | "board" | "projects" | "cli" | "about">("log");
   const [showReminder, setShowReminder] = useState(() => {
     // Show reminder once per day
     const lastDismissed = localStorage.getItem("slog-reminder-dismissed");
@@ -179,6 +181,7 @@ export default function App() {
               week={week}
               entries={entries}
               onDayClick={setSelectedDate}
+              onUpdate={loadData}
               loading={loading}
             />
             <Sidebar summary={summary} />
@@ -194,8 +197,12 @@ export default function App() {
         </>
       ) : view === "board" ? (
         <Board />
-      ) : (
+      ) : view === "projects" ? (
         <Projects />
+      ) : view === "cli" ? (
+        <CliPage />
+      ) : (
+        <About />
       )}
       {showReminder && (
         <SlugReminder

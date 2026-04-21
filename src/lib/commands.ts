@@ -58,6 +58,10 @@ export async function updateEntry(params: {
   });
 }
 
+export async function toggleSynced(id: string): Promise<boolean> {
+  return invoke("toggle_synced", { id });
+}
+
 export async function deleteEntry(id: string): Promise<void> {
   return invoke("delete_entry", { id });
 }

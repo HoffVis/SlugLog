@@ -30,6 +30,11 @@ impl Database {
     }
 
     fn init_schema(&self) -> SqlResult<()> {
+        // Migrate: add synced column to entries if missing
+        if self.conn.prepare("SELECT synced FROM entries LIMIT 0").is_err() {
+            self.conn.execute_batch("ALTER TABLE entries ADD COLUMN synced INTEGER NOT NULL DEFAULT 0;").ok();
+        }
+
         // Migrate: add started_at column if missing
         let has_started_at: bool = self.conn
             .prepare("SELECT started_at FROM tickets LIMIT 0")
@@ -109,6 +114,7 @@ impl Database {
             description: entry.description, hours: entry.hours,
             project: entry.project, project_number: entry.project_number,
             area: entry.area, output: entry.output, notes: entry.notes,
+            synced: false,
         })
     }
 
@@ -158,12 +164,13 @@ impl Database {
             area: entry.area,
             output: entry.output,
             notes: entry.notes,
+            synced: false,
         })
     }
 
     pub fn get_entries_for_date(&self, date: &str) -> SqlResult<Vec<Entry>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes
+            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes, COALESCE(synced, 0) as synced
              FROM entries WHERE date = ?1 ORDER BY time ASC",
         )?;
         let entries = stmt
@@ -182,6 +189,7 @@ impl Database {
                         .and_then(|a| TaskArea::from_str(&a)),
                     output: row.get(9)?,
                     notes: row.get(10)?,
+                    synced: row.get::<_, i32>(11).unwrap_or(0) != 0,
                 })
             })?
             .collect::<SqlResult<Vec<_>>>()?;
@@ -199,7 +207,7 @@ impl Database {
         let end = sunday.format("%Y-%m-%d").to_string();
 
         let mut stmt = self.conn.prepare(
-            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes
+            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes, COALESCE(synced, 0) as synced
              FROM entries WHERE date >= ?1 AND date <= ?2 ORDER BY date ASC, time ASC",
         )?;
         let entries = stmt
@@ -218,6 +226,7 @@ impl Database {
                         .and_then(|a| TaskArea::from_str(&a)),
                     output: row.get(9)?,
                     notes: row.get(10)?,
+                    synced: row.get::<_, i32>(11).unwrap_or(0) != 0,
                 })
             })?
             .collect::<SqlResult<Vec<_>>>()?;
@@ -280,7 +289,7 @@ impl Database {
 
         // Return updated entry
         let mut stmt = self.conn.prepare(
-            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes
+            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes, COALESCE(synced, 0) as synced
              FROM entries WHERE id = ?1",
         )?;
         stmt.query_row(params![id], |row| {
@@ -298,8 +307,23 @@ impl Database {
                     .and_then(|a| TaskArea::from_str(&a)),
                 output: row.get(9)?,
                 notes: row.get(10)?,
+                synced: row.get::<_, i32>(11).unwrap_or(0) != 0,
             })
         })
+    }
+
+    pub fn toggle_synced(&self, id: &str) -> SqlResult<bool> {
+        let current: i32 = self.conn.query_row(
+            "SELECT COALESCE(synced, 0) FROM entries WHERE id = ?1",
+            params![id],
+            |row| row.get(0),
+        )?;
+        let new_val = if current == 0 { 1 } else { 0 };
+        self.conn.execute(
+            "UPDATE entries SET synced = ?1 WHERE id = ?2",
+            params![new_val, id],
+        )?;
+        Ok(new_val != 0)
     }
 
     pub fn delete_entry(&self, id: &str) -> SqlResult<()> {

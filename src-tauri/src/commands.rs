@@ -87,6 +87,12 @@ pub fn update_entry(
 }
 
 #[tauri::command]
+pub fn toggle_synced(db: State<DbState>, id: String) -> Result<bool, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.toggle_synced(&id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn delete_entry(db: State<DbState>, id: String) -> Result<(), String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.delete_entry(&id).map_err(|e| e.to_string())

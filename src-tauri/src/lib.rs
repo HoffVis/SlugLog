@@ -18,6 +18,7 @@ pub fn run() {
             commands::get_today_entries,
             commands::create_entry,
             commands::update_entry,
+            commands::toggle_synced,
             commands::delete_entry,
             commands::get_week_summary,
             commands::open_main_window,
