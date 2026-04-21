@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { getTickets } from "../lib/commands";
+import { SlugMood, getSlugMoodFromStreak, getSlugMessage } from "./SlugMood";
+import type { SlugMoodType } from "./SlugMood";
 import type { Ticket, WeekSummary } from "../lib/types";
 import "./Sidebar.css";
 
@@ -20,6 +23,8 @@ const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export function Sidebar({ summary }: SidebarProps) {
   const [activeTimers, setActiveTimers] = useState<Ticket[]>([]);
+  const [slugMood, setSlugMood] = useState<SlugMoodType>("happy");
+  const [slugMessage, setSlugMessage] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -29,9 +34,18 @@ export function Sidebar({ summary }: SidebarProps) {
       } catch {
         // ignore
       }
+      try {
+        const status: { working_days_missed: number; today_hours: number; is_weekend: boolean } =
+          await invoke("get_slug_status");
+        const mood = getSlugMoodFromStreak(status.working_days_missed, status.today_hours, status.is_weekend);
+        setSlugMood(mood);
+        setSlugMessage(getSlugMessage(mood));
+      } catch {
+        // ignore
+      }
     };
     load();
-    const interval = setInterval(load, 15000);
+    const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -154,17 +168,9 @@ export function Sidebar({ summary }: SidebarProps) {
         </div>
       </div>
 
-      {/* Slug footer */}
-      <div className="sidebar-section sidebar-footer">
-        <svg viewBox="0 0 40 40" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.2 }}>
-          <ellipse cx="20" cy="26" rx="14" ry="8" fill="var(--slug-green-dim)" stroke="var(--slug-green)" strokeWidth="1.5"/>
-          <ellipse cx="24" cy="22" rx="8" ry="9" fill="var(--bg-surface)" stroke="var(--slug-green)" strokeWidth="1.2"/>
-          <line x1="14" y1="22" x2="11" y2="14" stroke="var(--slug-green)" strokeWidth="1.2" strokeLinecap="round"/>
-          <line x1="18" y1="21" x2="16" y2="13" stroke="var(--slug-green)" strokeWidth="1.2" strokeLinecap="round"/>
-          <circle cx="11" cy="13" r="2" fill="var(--slug-green)"/>
-          <circle cx="16" cy="12" r="2" fill="var(--slug-green)"/>
-        </svg>
-        <div className="sidebar-tagline">keep slogging &middot; v0.1.0</div>
+      {/* Live slug mood */}
+      <div className="sidebar-section sidebar-slug">
+        <SlugMood mood={slugMood} message={slugMessage} size="small" />
       </div>
     </aside>
   );

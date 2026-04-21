@@ -95,12 +95,21 @@ export default function App() {
     loadData();
   }, [loadData]);
 
-  // Auto-refresh every 30s to pick up CLI entries
+  // Light polling — only re-fetch if entry count changed (no unnecessary re-renders)
   useEffect(() => {
     if (view !== "log") return;
-    const interval = setInterval(loadData, 30000);
+    let lastCount = entries.length;
+    const interval = setInterval(async () => {
+      try {
+        const fresh = await getEntriesForWeek(year, week);
+        if (fresh.length !== lastCount) {
+          lastCount = fresh.length;
+          loadData();
+        }
+      } catch { /* ignore */ }
+    }, 15000);
     return () => clearInterval(interval);
-  }, [view, loadData]);
+  }, [view, year, week, entries.length]);
 
   const handlePrevWeek = () => {
     if (week === 1) {

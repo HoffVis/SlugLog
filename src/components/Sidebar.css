@@ -223,15 +223,9 @@
   flex-shrink: 0;
 }
 
-/* Footer */
-.sidebar-footer {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.sidebar-tagline {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-dim);
-  margin-top: 6px;
+/* Live slug mood */
+.sidebar-slug {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
 }
