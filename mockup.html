@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLOG — Dev Journal & Timetracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Backgrounds — Light mode */
+    --bg-deep: #f5f6f8;
+    --bg-base: #ffffff;
+    --bg-surface: #f0f1f4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fb;
+    --bg-input: #f5f6f8;
+
+    /* Borders */
+    --border-subtle: #e5e7ed;
+    --border-default: #d5d8e0;
+    --border-hover: #b8bcc8;
+
+    /* Text */
+    --text-primary: #1a1d2b;
+    --text-secondary: #5a6078;
+    --text-muted: #8a90a5;
+    --text-dim: #b0b5c5;
+
+    /* Brand — nautical teal (pirate slug!) */
+    --slug-green: #0d9488;
+    --slug-green-dim: #e6f7f5;
+    --slug-green-glow: rgba(13, 148, 136, 0.1);
+
+    /* Task area colors — slightly deeper for light bg */
+    --color-programming: #3b82f6;
+    --color-testing: #22c55e;
+    --color-bug: #ef4444;
+    --color-meeting: #eab308;
+    --color-documenting: #a855f7;
+    --color-investigating: #f97316;
+
+    /* Task area backgrounds */
+    --color-programming-bg: rgba(59, 130, 246, 0.08);
+    --color-testing-bg: rgba(34, 197, 94, 0.08);
+    --color-bug-bg: rgba(239, 68, 68, 0.08);
+    --color-meeting-bg: rgba(234, 179, 8, 0.08);
+    --color-documenting-bg: rgba(168, 85, 247, 0.08);
+    --color-investigating-bg: rgba(249, 115, 22, 0.08);
+
+    /* Sizing */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    /* Fonts */
+    --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== SUBTLE TEXTURE ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.015;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ===== APP SHELL ===== */
+  .app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    background: var(--bg-deep);
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-mark {
+    width: 38px;
+    height: 38px;
+    position: relative;
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .logo-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-primary);
+  }
+
+  .logo-subtitle {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .week-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .week-nav-btn {
+    background: none;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+
+  .week-nav-btn:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+    background: var(--bg-surface);
+  }
+
+  .week-label {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    min-width: 200px;
+    text-align: center;
+  }
+
+  .week-label span {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .week-hours-badge {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--slug-green);
+    background: var(--slug-green-dim);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(13, 148, 136, 0.15);
+  }
+
+  .today-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    padding: 5px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .today-btn:hover {
+    border-color: var(--slug-green);
+    color: var(--slug-green);
+  }
+
+  /* ===== QUICK ADD BAR ===== */
+  .quick-add {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  /* Simple mode — one line */
+  .quick-add-simple {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .quick-add-what {
+    font-family: var(--font-body);
+    font-size: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 9px 14px;
+    border-radius: var(--radius-md);
+    outline: none;
+    flex: 1;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .quick-add-what:focus {
+    border-color: var(--slug-green);
+    box-shadow: 0 0 0 3px var(--slug-green-glow), 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .quick-add-what::placeholder {
+    color: var(--text-dim);
+  }
+
+  .quick-add-hours-simple {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 9px 10px;
+    border-radius: var(--radius-md);
+    outline: none;
+    width: 72px;
+    text-align: center;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .quick-add-hours-simple:focus {
+    border-color: var(--slug-green);
+    box-shadow: 0 0 0 3px var(--slug-green-glow);
+  }
+
+  .quick-add-hours-simple::placeholder {
+    color: var(--text-dim);
+  }
+
+  .quick-add-submit {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--slug-green);
+    color: #fff;
+    border: none;
+    padding: 0 18px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    height: 38px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .quick-add-submit:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  .quick-add-expand {
+    background: none;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .quick-add-expand:hover {
+    border-color: var(--slug-green);
+    color: var(--slug-green);
+    background: var(--slug-green-glow);
+  }
+
+  .quick-add-expand.is-expanded {
+    background: var(--slug-green-dim);
+    border-color: var(--slug-green);
+    color: var(--slug-green);
+  }
+
+  /* Detailed mode — full fields */
+  .quick-add-detailed {
+    display: none;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-subtle);
+  }
+
+  .quick-add-detailed.visible {
+    display: flex;
+  }
+
+  .quick-add-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .quick-add-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .quick-add-input,
+  .quick-add-select {
+    font-family: var(--font-body);
+    font-size: 13px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .quick-add-input:focus,
+  .quick-add-select:focus {
+    border-color: var(--slug-green);
+    box-shadow: 0 0 0 2px var(--slug-green-glow);
+  }
+
+  .quick-add-input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .quick-add-field.project { flex: 1.2; }
+  .quick-add-field.pn { width: 70px; }
+  .quick-add-field.area { width: 140px; }
+  .quick-add-field.output { flex: 1.5; }
+  .quick-add-field.notes { flex: 1; }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+    margin-top: 24px;
+  }
+
+  /* ===== GIT TIMELINE ===== */
+  .timeline {
+    position: relative;
+    padding-right: 32px;
+  }
+
+  /* The vertical branch line */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 84px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--slug-green) 0%, var(--border-default) 20%, var(--border-default) 80%, transparent 100%);
+  }
+
+  .day-row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 8px;
+    min-height: 80px;
+  }
+
+  .day-row.is-today .day-date-label {
+    color: var(--slug-green);
+  }
+
+  .day-row.is-today .day-node {
+    background: var(--slug-green);
+    box-shadow: 0 0 12px rgba(94, 234, 212, 0.4);
+  }
+
+  /* Date column */
+  .day-date {
+    width: 72px;
+    flex-shrink: 0;
+    padding-top: 12px;
+    text-align: right;
+    padding-right: 16px;
+  }
+
+  .day-date-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 1;
+  }
+
+  .day-date-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+
+  .day-hours-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* Node on the branch line */
+  .day-node-col {
+    width: 26px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding-top: 14px;
+    position: relative;
+  }
+
+  .day-node {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border-default);
+    border: 2.5px solid var(--bg-deep);
+    z-index: 2;
+    transition: all 0.2s;
+    box-shadow: 0 0 0 1px var(--border-subtle);
+  }
+
+  .day-row:hover .day-node {
+    background: var(--slug-green);
+    transform: scale(1.2);
+  }
+
+  .day-node.has-entries {
+    background: var(--text-secondary);
+  }
+
+  /* Entries area */
+  .day-entries {
+    flex: 1;
+    padding: 6px 0 6px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* Entry card — the commit */
+  .entry-card {
+    display: grid;
+    grid-template-columns: 6px 1fr auto;
+    gap: 0 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .entry-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+  }
+
+  .entry-card[data-area="programming"]::before { background: var(--color-programming); }
+  .entry-card[data-area="testing"]::before { background: var(--color-testing); }
+  .entry-card[data-area="bug"]::before { background: var(--color-bug); }
+  .entry-card[data-area="meeting"]::before { background: var(--color-meeting); }
+  .entry-card[data-area="documenting"]::before { background: var(--color-documenting); }
+  .entry-card[data-area="investigating"]::before { background: var(--color-investigating); }
+
+  .entry-card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card-hover);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Connector line from branch to card */
+  .entry-card:first-child::after {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 16px;
+    width: 26px;
+    height: 1px;
+    background: var(--border-default);
+  }
+
+  .entry-color-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 6px;
+    grid-row: span 2;
+    display: none; /* hidden, using left border instead */
+  }
+
+  .entry-main {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-left: 8px;
+  }
+
+  .entry-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .entry-top-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  .entry-project {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .entry-pn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--bg-input);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .entry-area-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  .entry-area-tag[data-area="programming"] { color: var(--color-programming); background: var(--color-programming-bg); }
+  .entry-area-tag[data-area="testing"] { color: var(--color-testing); background: var(--color-testing-bg); }
+  .entry-area-tag[data-area="bug"] { color: var(--color-bug); background: var(--color-bug-bg); }
+  .entry-area-tag[data-area="meeting"] { color: var(--color-meeting); background: var(--color-meeting-bg); }
+  .entry-area-tag[data-area="documenting"] { color: var(--color-documenting); background: var(--color-documenting-bg); }
+  .entry-area-tag[data-area="investigating"] { color: var(--color-investigating); background: var(--color-investigating-bg); }
+
+  .entry-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .entry-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .entry-hours {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .entry-hours span {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .entry-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* Empty day */
+  .day-empty {
+    padding: 12px 0 12px 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .day-empty-msg {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* Weekend styling */
+  .day-row.is-weekend {
+    opacity: 0.4;
+    min-height: 40px;
+  }
+
+  .day-row.is-weekend:hover {
+    opacity: 0.7;
+  }
+
+  /* ===== RIGHT SIDEBAR ===== */
+  .sidebar {
+    border-left: 1px solid var(--border-subtle);
+    padding-left: 24px;
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+
+  .sidebar-section {
+    margin-bottom: 28px;
+  }
+
+  .sidebar-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  /* Weekly summary by project */
+  .project-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .project-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    transition: all 0.15s;
+  }
+
+  .project-row:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-card);
+  }
+
+  .project-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .project-row-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .project-row-pn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .project-row-hours {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .project-row-hours span {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  /* Hours bar */
+  .project-bar {
+    height: 3px;
+    background: var(--border-subtle);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .project-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* Area breakdown */
+  .area-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .area-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .area-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .area-name {
+    color: var(--text-secondary);
+    flex: 1;
+  }
+
+  .area-hours {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* Heatmap mini */
+  .heatmap {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+
+  .heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .heatmap-cell.level-1 { background: rgba(13, 148, 136, 0.1); border-color: rgba(13, 148, 136, 0.15); }
+  .heatmap-cell.level-2 { background: rgba(13, 148, 136, 0.2); border-color: rgba(13, 148, 136, 0.25); }
+  .heatmap-cell.level-3 { background: rgba(13, 148, 136, 0.35); border-color: rgba(13, 148, 136, 0.3); }
+  .heatmap-cell.level-4 { background: rgba(13, 148, 136, 0.5); border-color: rgba(13, 148, 136, 0.4); }
+  .heatmap-cell.today { box-shadow: 0 0 0 2px var(--slug-green); }
+
+  .heatmap-labels {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  .heatmap-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  /* ===== DAY DETAIL PANEL (expanded) ===== */
+  .day-detail-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 29, 43, 0.3);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .day-detail-overlay.visible {
+    display: flex;
+  }
+
+  .day-detail {
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .day-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    background: var(--bg-base);
+  }
+
+  .day-detail-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .day-detail-hours {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--slug-green);
+  }
+
+  .day-detail-close {
+    background: none;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .day-detail-close:hover {
+    border-color: var(--color-bug);
+    color: var(--color-bug);
+  }
+
+  .day-detail-entries {
+    padding: 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-entry-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .detail-entry-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+  }
+
+  .detail-entry-card[data-area="programming"]::before { background: var(--color-programming); }
+  .detail-entry-card[data-area="testing"]::before { background: var(--color-testing); }
+  .detail-entry-card[data-area="bug"]::before { background: var(--color-bug); }
+  .detail-entry-card[data-area="meeting"]::before { background: var(--color-meeting); }
+  .detail-entry-card[data-area="documenting"]::before { background: var(--color-documenting); }
+  .detail-entry-card[data-area="investigating"]::before { background: var(--color-investigating); }
+
+  .detail-entry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .detail-entry-project {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .detail-entry-hours {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .detail-entry-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .detail-entry-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .detail-entry-output {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 8px 10px;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--border-default);
+  }
+
+  .detail-entry-output strong {
+    color: var(--text-secondary);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ===== SLUG MASCOT (SVG) ===== */
+  .slug-svg {
+    fill: var(--slug-green);
+    opacity: 0.9;
+  }
+
+  .slug-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    opacity: 0.5;
+  }
+
+  .slug-empty-state svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .slug-empty-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .day-row {
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  .day-row:nth-child(1) { animation-delay: 0s; }
+  .day-row:nth-child(2) { animation-delay: 0.04s; }
+  .day-row:nth-child(3) { animation-delay: 0.08s; }
+  .day-row:nth-child(4) { animation-delay: 0.12s; }
+  .day-row:nth-child(5) { animation-delay: 0.16s; }
+  .day-row:nth-child(6) { animation-delay: 0.2s; }
+  .day-row:nth-child(7) { animation-delay: 0.24s; }
+
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .day-detail {
+    animation: fadeInScale 0.2s ease;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ===== TOOLTIP ===== */
+  .heatmap-cell[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 4px;
+  }
+
+  /* Week total bar at bottom of sidebar */
+  .week-total-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    gap: 2px;
+    margin-top: 12px;
+  }
+
+  .week-total-segment {
+    height: 100%;
+    border-radius: 2px;
+    transition: flex 0.5s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Slug body -->
+          <ellipse cx="20" cy="26" rx="14" ry="8" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.5"/>
+          <!-- Slug slime trail -->
+          <path d="M6 30 Q2 30 1 28" stroke="#0d9488" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+          <path d="M4 31 Q1 31 0 29" stroke="#0d9488" stroke-width="0.5" opacity="0.2" stroke-linecap="round"/>
+          <!-- Slug shell spiral -->
+          <ellipse cx="24" cy="22" rx="8" ry="9" fill="#f0f1f4" stroke="#0d9488" stroke-width="1.2"/>
+          <path d="M24 14 Q28 16 28 20 Q28 24 24 25 Q20 25 20 21 Q20 18 23 17" stroke="#0d9488" stroke-width="0.8" fill="none" opacity="0.5"/>
+          <!-- Eye stalks -->
+          <line x1="14" y1="22" x2="11" y2="14" stroke="#0d9488" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="18" y1="21" x2="16" y2="13" stroke="#0d9488" stroke-width="1.2" stroke-linecap="round"/>
+          <!-- Eyes -->
+          <circle cx="11" cy="13" r="2" fill="#0d9488"/>
+          <circle cx="16" cy="12" r="2" fill="#0d9488"/>
+          <circle cx="11" cy="12.5" r="0.8" fill="#1a1d2b"/>
+          <circle cx="16" cy="11.5" r="0.8" fill="#1a1d2b"/>
+          <!-- Smile -->
+          <path d="M12 25 Q15 27 18 25" stroke="#0d9488" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-title">SLOG</div>
+        <div class="logo-subtitle">dev journal</div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="week-nav">
+        <button class="week-nav-btn">&larr;</button>
+        <div class="week-label">Week 16 <span>&middot; Apr 14 – 18</span></div>
+        <button class="week-nav-btn">&rarr;</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="week-hours-badge">31.5h</div>
+      <button class="today-btn">Today</button>
+    </div>
+  </header>
+
+  <!-- ===== QUICK ADD ===== -->
+  <div class="quick-add">
+    <form onsubmit="return false;">
+      <!-- Simple mode: what + hours -->
+      <div class="quick-add-simple">
+        <input class="quick-add-what" type="text" placeholder="What did you do? e.g. &quot;Fixed DMX race condition&quot;">
+        <input class="quick-add-hours-simple" type="text" placeholder="2.5h">
+        <button class="quick-add-submit">+ LOG</button>
+        <button class="quick-add-expand" onclick="toggleDetailed()" id="expandBtn" title="More fields">&#x25BC;</button>
+      </div>
+      <!-- Detailed mode: optional fields -->
+      <div class="quick-add-detailed" id="detailedFields">
+        <div class="quick-add-field project">
+          <label class="quick-add-label">Project</label>
+          <input class="quick-add-input" type="text" placeholder="Reflect Color Studio">
+        </div>
+        <div class="quick-add-field pn">
+          <label class="quick-add-label">PN</label>
+          <input class="quick-add-input" type="text" placeholder="6003">
+        </div>
+        <div class="quick-add-field area">
+          <label class="quick-add-label">Area</label>
+          <select class="quick-add-select">
+            <option value="">—</option>
+            <option>Programming</option>
+            <option>Testing</option>
+            <option>Bug solving</option>
+            <option>Meeting</option>
+            <option>Documenting</option>
+            <option>Investigating</option>
+          </select>
+        </div>
+        <div class="quick-add-field output">
+          <label class="quick-add-label">Output</label>
+          <input class="quick-add-input" type="text" placeholder="Result / deliverable">
+        </div>
+        <div class="quick-add-field notes">
+          <label class="quick-add-label">Notes</label>
+          <input class="quick-add-input" type="text" placeholder="Lessons, thoughts...">
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main">
+
+    <!-- ===== TIMELINE ===== -->
+    <div class="timeline">
+
+      <!-- Monday -->
+      <div class="day-row" onclick="openDay('mon')">
+        <div class="day-date">
+          <div class="day-date-label">Mon</div>
+          <div class="day-date-sub">Apr 14</div>
+          <div class="day-hours-label">7.0h</div>
+        </div>
+        <div class="day-node-col"><div class="day-node has-entries"></div></div>
+        <div class="day-entries">
+          <div class="entry-card" data-area="programming">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">Reflect Color Studio</span>
+                  <span class="entry-pn">#6003</span>
+                  <span class="entry-area-tag" data-area="programming">Programming</span>
+                </div>
+                <div class="entry-desc">Implemented DMX Mode 3 channel mapping for 16-bit RGBWW+Dim</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">3.5<span>h</span></div>
+                <div class="entry-time">09:15</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="meeting">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">AI Software & Apps</span>
+                  <span class="entry-pn">#7100</span>
+                  <span class="entry-area-tag" data-area="meeting">Meeting</span>
+                </div>
+                <div class="entry-desc">Sprint planning — prioritized SLOG app and MCP server review</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.5<span>h</span></div>
+                <div class="entry-time">13:30</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="documenting">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">Reflect Color Studio</span>
+                  <span class="entry-pn">#6003</span>
+                  <span class="entry-area-tag" data-area="documenting">Documenting</span>
+                </div>
+                <div class="entry-desc">Updated user manual — safety wire section and eye safety classification</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">2.0<span>h</span></div>
+                <div class="entry-time">15:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuesday -->
+      <div class="day-row" onclick="openDay('tue')">
+        <div class="day-date">
+          <div class="day-date-label">Tue</div>
+          <div class="day-date-sub">Apr 15</div>
+          <div class="day-hours-label">8.0h</div>
+        </div>
+        <div class="day-node-col"><div class="day-node has-entries"></div></div>
+        <div class="day-entries">
+          <div class="entry-card" data-area="programming">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">Connected Lighting</span>
+                  <span class="entry-pn">#5500</span>
+                  <span class="entry-area-tag" data-area="programming">Programming</span>
+                </div>
+                <div class="entry-desc">Refactored DMX fade engine — async serial port handling with tokio</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">4.0<span>h</span></div>
+                <div class="entry-time">08:45</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="bug">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">Connected Lighting</span>
+                  <span class="entry-pn">#5500</span>
+                  <span class="entry-area-tag" data-area="bug">Bug Solving</span>
+                </div>
+                <div class="entry-desc">Fixed race condition in fixture discovery — RDM responses dropping</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">2.5<span>h</span></div>
+                <div class="entry-time">13:15</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="investigating">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">AI Software & Apps</span>
+                  <span class="entry-pn">#7100</span>
+                  <span class="entry-area-tag" data-area="investigating">Investigating</span>
+                </div>
+                <div class="entry-desc">Evaluated CLI vs MCP approach for SLOG — CLI wins on token efficiency</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.5<span>h</span></div>
+                <div class="entry-time">16:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wednesday -->
+      <div class="day-row" onclick="openDay('wed')">
+        <div class="day-date">
+          <div class="day-date-label">Wed</div>
+          <div class="day-date-sub">Apr 16</div>
+          <div class="day-hours-label">6.5h</div>
+        </div>
+        <div class="day-node-col"><div class="day-node has-entries"></div></div>
+        <div class="day-entries">
+          <div class="entry-card" data-area="programming">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">AI Software & Apps</span>
+                  <span class="entry-pn">#7100</span>
+                  <span class="entry-area-tag" data-area="programming">Programming</span>
+                </div>
+                <div class="entry-desc">Built SLOG Tauri scaffold — shared Rust crates, SQLite schema, CLI binary</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">5.0<span>h</span></div>
+                <div class="entry-time">09:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="testing">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">Reflect Color</span>
+                  <span class="entry-pn">#6002</span>
+                  <span class="entry-area-tag" data-area="testing">Testing</span>
+                </div>
+                <div class="entry-desc">Verified PSU daisy-chain limits — 3 fixtures per output confirmed</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.5<span>h</span></div>
+                <div class="entry-time">15:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thursday -->
+      <div class="day-row" onclick="openDay('thu')">
+        <div class="day-date">
+          <div class="day-date-label">Thu</div>
+          <div class="day-date-sub">Apr 17</div>
+          <div class="day-hours-label">7.5h</div>
+        </div>
+        <div class="day-node-col"><div class="day-node has-entries"></div></div>
+        <div class="day-entries">
+          <div class="entry-card" data-area="programming">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">AI Software & Apps</span>
+                  <span class="entry-pn">#7100</span>
+                  <span class="entry-area-tag" data-area="programming">Programming</span>
+                </div>
+                <div class="entry-desc">SLOG week view UI — git-graph timeline, quick-add bar, sidebar stats</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">5.5<span>h</span></div>
+                <div class="entry-time">08:30</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="meeting">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">General</span>
+                  <span class="entry-pn">#0000</span>
+                  <span class="entry-area-tag" data-area="meeting">Meeting</span>
+                </div>
+                <div class="entry-desc">R&D weekly sync — demo'd SLOG mockup, discussed ResourceFlow overlap</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.0<span>h</span></div>
+                <div class="entry-time">14:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="documenting">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">Reflect Color</span>
+                  <span class="entry-pn">#6002</span>
+                  <span class="entry-area-tag" data-area="documenting">Documenting</span>
+                </div>
+                <div class="entry-desc">Added system limitations section to RC manual — PSU capacity table</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.0<span>h</span></div>
+                <div class="entry-time">15:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Friday (today) -->
+      <div class="day-row is-today" onclick="openDay('fri')">
+        <div class="day-date">
+          <div class="day-date-label">Fri</div>
+          <div class="day-date-sub">Apr 18</div>
+          <div class="day-hours-label">2.5h</div>
+        </div>
+        <div class="day-node-col"><div class="day-node has-entries"></div></div>
+        <div class="day-entries">
+          <div class="entry-card" data-area="investigating">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">AI Software & Apps</span>
+                  <span class="entry-pn">#7100</span>
+                  <span class="entry-area-tag" data-area="investigating">Investigating</span>
+                </div>
+                <div class="entry-desc">Reviewed Project Radar, RDS, ResourceFlow — identified pattern overlap</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.5<span>h</span></div>
+                <div class="entry-time">09:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="entry-card" data-area="programming">
+            <div class="entry-main">
+              <div class="entry-info">
+                <div class="entry-top-line">
+                  <span class="entry-project">AI Software & Apps</span>
+                  <span class="entry-pn">#7100</span>
+                  <span class="entry-area-tag" data-area="programming">Programming</span>
+                </div>
+                <div class="entry-desc">SLOG design mockup — finalizing visual direction with Claude</div>
+              </div>
+              <div class="entry-meta">
+                <div class="entry-hours">1.0<span>h</span></div>
+                <div class="entry-time">10:30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saturday -->
+      <div class="day-row is-weekend">
+        <div class="day-date">
+          <div class="day-date-label">Sat</div>
+          <div class="day-date-sub">Apr 19</div>
+        </div>
+        <div class="day-node-col"><div class="day-node"></div></div>
+        <div class="day-empty">
+          <span class="day-empty-msg">weekend</span>
+        </div>
+      </div>
+
+      <!-- Sunday -->
+      <div class="day-row is-weekend">
+        <div class="day-date">
+          <div class="day-date-label">Sun</div>
+          <div class="day-date-sub">Apr 20</div>
+        </div>
+        <div class="day-node-col"><div class="day-node"></div></div>
+        <div class="day-empty">
+          <span class="day-empty-msg">weekend</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+
+      <!-- Heatmap -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">This Week</div>
+        <div class="heatmap">
+          <div class="heatmap-cell level-3" data-tooltip="Mon: 7.0h"></div>
+          <div class="heatmap-cell level-4" data-tooltip="Tue: 8.0h"></div>
+          <div class="heatmap-cell level-3" data-tooltip="Wed: 6.5h"></div>
+          <div class="heatmap-cell level-3" data-tooltip="Thu: 7.5h"></div>
+          <div class="heatmap-cell level-1 today" data-tooltip="Fri: 2.5h"></div>
+          <div class="heatmap-cell" data-tooltip="Sat: —"></div>
+          <div class="heatmap-cell" data-tooltip="Sun: —"></div>
+        </div>
+        <div class="heatmap-labels">
+          <span class="heatmap-label">M</span>
+          <span class="heatmap-label">T</span>
+          <span class="heatmap-label">W</span>
+          <span class="heatmap-label">T</span>
+          <span class="heatmap-label">F</span>
+          <span class="heatmap-label">S</span>
+          <span class="heatmap-label">S</span>
+        </div>
+      </div>
+
+      <!-- By Project -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">By Project</div>
+        <div class="project-summary">
+          <div class="project-row">
+            <div class="project-row-info">
+              <div class="project-row-name">AI Software & Apps</div>
+              <div class="project-row-pn">#7100</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width: 47%; background: var(--color-programming);"></div></div>
+            </div>
+            <div class="project-row-hours">14.5<span>h</span></div>
+          </div>
+          <div class="project-row">
+            <div class="project-row-info">
+              <div class="project-row-name">Connected Lighting</div>
+              <div class="project-row-pn">#5500</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width: 21%; background: var(--color-bug);"></div></div>
+            </div>
+            <div class="project-row-hours">6.5<span>h</span></div>
+          </div>
+          <div class="project-row">
+            <div class="project-row-info">
+              <div class="project-row-name">Reflect Color Studio</div>
+              <div class="project-row-pn">#6003</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width: 18%; background: var(--color-documenting);"></div></div>
+            </div>
+            <div class="project-row-hours">5.5<span>h</span></div>
+          </div>
+          <div class="project-row">
+            <div class="project-row-info">
+              <div class="project-row-name">Reflect Color</div>
+              <div class="project-row-pn">#6002</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width: 8%; background: var(--color-testing);"></div></div>
+            </div>
+            <div class="project-row-hours">2.5<span>h</span></div>
+          </div>
+          <div class="project-row">
+            <div class="project-row-info">
+              <div class="project-row-name">General</div>
+              <div class="project-row-pn">#0000</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width: 6%; background: var(--color-meeting);"></div></div>
+            </div>
+            <div class="project-row-hours">1.0<span>h</span></div>
+          </div>
+        </div>
+
+        <!-- Stacked total bar -->
+        <div class="week-total-bar">
+          <div class="week-total-segment" style="flex: 14.5; background: var(--color-programming);"></div>
+          <div class="week-total-segment" style="flex: 6.5; background: var(--color-bug);"></div>
+          <div class="week-total-segment" style="flex: 5.5; background: var(--color-documenting);"></div>
+          <div class="week-total-segment" style="flex: 2.5; background: var(--color-testing);"></div>
+          <div class="week-total-segment" style="flex: 2.5; background: var(--color-meeting);"></div>
+          <div class="week-total-segment" style="flex: 8.5; background: var(--border-subtle);" title="Remaining to 40h"></div>
+        </div>
+      </div>
+
+      <!-- By Area -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">By Area</div>
+        <div class="area-breakdown">
+          <div class="area-row">
+            <div class="area-dot" style="background: var(--color-programming);"></div>
+            <span class="area-name">Programming</span>
+            <span class="area-hours">19.0h</span>
+          </div>
+          <div class="area-row">
+            <div class="area-dot" style="background: var(--color-documenting);"></div>
+            <span class="area-name">Documenting</span>
+            <span class="area-hours">3.0h</span>
+          </div>
+          <div class="area-row">
+            <div class="area-dot" style="background: var(--color-meeting);"></div>
+            <span class="area-name">Meeting</span>
+            <span class="area-hours">2.5h</span>
+          </div>
+          <div class="area-row">
+            <div class="area-dot" style="background: var(--color-bug);"></div>
+            <span class="area-name">Bug solving</span>
+            <span class="area-hours">2.5h</span>
+          </div>
+          <div class="area-row">
+            <div class="area-dot" style="background: var(--color-investigating);"></div>
+            <span class="area-name">Investigating</span>
+            <span class="area-hours">3.0h</span>
+          </div>
+          <div class="area-row">
+            <div class="area-dot" style="background: var(--color-testing);"></div>
+            <span class="area-name">Testing</span>
+            <span class="area-hours">1.5h</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slug empty state / mascot -->
+      <div class="sidebar-section" style="margin-top: 20px; text-align: center;">
+        <svg viewBox="0 0 40 40" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.2;">
+          <ellipse cx="20" cy="26" rx="14" ry="8" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.5"/>
+          <ellipse cx="24" cy="22" rx="8" ry="9" fill="#f0f1f4" stroke="#0d9488" stroke-width="1.2"/>
+          <path d="M24 14 Q28 16 28 20 Q28 24 24 25 Q20 25 20 21 Q20 18 23 17" stroke="#0d9488" stroke-width="0.8" fill="none" opacity="0.5"/>
+          <line x1="14" y1="22" x2="11" y2="14" stroke="#0d9488" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="18" y1="21" x2="16" y2="13" stroke="#0d9488" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="11" cy="13" r="2" fill="#0d9488"/>
+          <circle cx="16" cy="12" r="2" fill="#0d9488"/>
+          <circle cx="11" cy="12.5" r="0.8" fill="#1a1d2b"/>
+          <circle cx="16" cy="11.5" r="0.8" fill="#1a1d2b"/>
+          <path d="M12 25 Q15 27 18 25" stroke="#0d9488" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 6px;">
+          keep slogging &middot; v0.1.0
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- ===== DAY DETAIL OVERLAY ===== -->
+<div class="day-detail-overlay" id="dayDetail" onclick="if(event.target===this)closeDay()">
+  <div class="day-detail">
+    <div class="day-detail-header">
+      <div>
+        <div class="day-detail-title" id="dayDetailTitle">Monday, Apr 14</div>
+        <div class="day-detail-hours" id="dayDetailHours">7.0 hours logged</div>
+      </div>
+      <button class="day-detail-close" onclick="closeDay()">&times;</button>
+    </div>
+    <div class="day-detail-entries" id="dayDetailEntries">
+      <div class="detail-entry-card" data-area="programming">
+        <div class="detail-entry-top">
+          <span class="detail-entry-project">Reflect Color Studio <span class="entry-pn">#6003</span></span>
+          <span class="detail-entry-hours">3.5h</span>
+        </div>
+        <div class="detail-entry-tags">
+          <span class="entry-area-tag" data-area="programming">Programming</span>
+          <span class="entry-time">09:15 – 12:45</span>
+        </div>
+        <div class="detail-entry-desc">Implemented DMX Mode 3 channel mapping for 16-bit RGBWW+Dim. Added proper channel offset calculation for multi-fixture setups. Tested with 3 fixtures on single universe.</div>
+        <div class="detail-entry-output"><strong>Output:</strong> Working Mode 3 implementation — passes all 8 test scenarios. PR #42 ready for review.</div>
+      </div>
+      <div class="detail-entry-card" data-area="meeting">
+        <div class="detail-entry-top">
+          <span class="detail-entry-project">AI Software & Apps <span class="entry-pn">#7100</span></span>
+          <span class="detail-entry-hours">1.5h</span>
+        </div>
+        <div class="detail-entry-tags">
+          <span class="entry-area-tag" data-area="meeting">Meeting</span>
+          <span class="entry-time">13:30 – 15:00</span>
+        </div>
+        <div class="detail-entry-desc">Sprint planning session. Reviewed backlog, prioritized SLOG app development and MCP server audit. Discussed deprecating RDS in favor of ResourceFlow long-term.</div>
+        <div class="detail-entry-output"><strong>Output:</strong> Sprint backlog updated. SLOG prioritized as week's main deliverable.</div>
+      </div>
+      <div class="detail-entry-card" data-area="documenting">
+        <div class="detail-entry-top">
+          <span class="detail-entry-project">Reflect Color Studio <span class="entry-pn">#6003</span></span>
+          <span class="detail-entry-hours">2.0h</span>
+        </div>
+        <div class="detail-entry-tags">
+          <span class="entry-area-tag" data-area="documenting">Documenting</span>
+          <span class="entry-time">15:00 – 17:00</span>
+        </div>
+        <div class="detail-entry-desc">Updated user manual HTML. Added safety wire section with 4 marked points documentation. Corrected eye safety classification to Risk Group 1 (DS/EN 62471:2008).</div>
+        <div class="detail-entry-output"><strong>Output:</strong> Manual v2.3 published. Print-to-PDF verified against A4 reference.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openDay(day) {
+    const data = {
+      mon: { title: 'Monday, Apr 14', hours: '7.0 hours logged' },
+      tue: { title: 'Tuesday, Apr 15', hours: '8.0 hours logged' },
+      wed: { title: 'Wednesday, Apr 16', hours: '6.5 hours logged' },
+      thu: { title: 'Thursday, Apr 17', hours: '7.5 hours logged' },
+      fri: { title: 'Friday, Apr 18', hours: '2.5 hours logged' },
+    };
+    const d = data[day];
+    if (!d) return;
+    document.getElementById('dayDetailTitle').textContent = d.title;
+    document.getElementById('dayDetailHours').textContent = d.hours;
+    document.getElementById('dayDetail').classList.add('visible');
+  }
+
+  function closeDay() {
+    document.getElementById('dayDetail').classList.remove('visible');
+  }
+
+  function toggleDetailed() {
+    const fields = document.getElementById('detailedFields');
+    const btn = document.getElementById('expandBtn');
+    fields.classList.toggle('visible');
+    btn.classList.toggle('is-expanded');
+    btn.innerHTML = fields.classList.contains('visible') ? '&#x25B2;' : '&#x25BC;';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDay();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLOG — Tray Popup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #f5f6f8;
+    --bg-base: #ffffff;
+    --bg-surface: #f0f1f4;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fb;
+    --bg-input: #f5f6f8;
+
+    --border-subtle: #e5e7ed;
+    --border-default: #d5d8e0;
+    --border-hover: #b8bcc8;
+
+    --text-primary: #1a1d2b;
+    --text-secondary: #5a6078;
+    --text-muted: #8a90a5;
+    --text-dim: #b0b5c5;
+
+    --slug-green: #0d9488;
+    --slug-green-dim: #e6f7f5;
+    --slug-green-glow: rgba(13, 148, 136, 0.1);
+
+    --color-programming: #3b82f6;
+    --color-testing: #22c55e;
+    --color-bug: #ef4444;
+    --color-meeting: #eab308;
+    --color-documenting: #a855f7;
+    --color-investigating: #f97316;
+
+    --color-programming-bg: rgba(59, 130, 246, 0.08);
+    --color-testing-bg: rgba(34, 197, 94, 0.08);
+    --color-bug-bg: rgba(239, 68, 68, 0.08);
+    --color-meeting-bg: rgba(234, 179, 8, 0.08);
+    --color-documenting-bg: rgba(168, 85, 247, 0.08);
+    --color-investigating-bg: rgba(249, 115, 22, 0.08);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: #e8e9ed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== SIMULATED MENU BAR ===== */
+  .menubar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: linear-gradient(to bottom, #f8f8fa, #e8e9ed);
+    border-bottom: 1px solid #d0d1d5;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 12px;
+    gap: 18px;
+    z-index: 1000;
+  }
+
+  .menubar-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: #3a3a3c;
+  }
+
+  .menubar-slug {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .menubar-slug:hover {
+    background: rgba(0,0,0,0.06);
+  }
+
+  .menubar-slug.active {
+    background: rgba(13, 148, 136, 0.12);
+  }
+
+  .menubar-slug svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .menubar-time {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ===== TRAY POPUP ===== */
+  .tray-popup {
+    width: 360px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.1),
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 0 0 0.5px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-top: 8px;
+    animation: dropIn 0.15s ease;
+  }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Arrow pointer */
+  .tray-popup::before {
+    content: '';
+    position: absolute;
+    top: 36px;
+    right: 82px;
+    width: 12px;
+    height: 12px;
+    background: var(--bg-base);
+    border-left: 1px solid var(--border-default);
+    border-top: 1px solid var(--border-default);
+    transform: rotate(45deg);
+    z-index: 1001;
+  }
+
+  /* ===== TRAY HEADER ===== */
+  .tray-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+
+  .tray-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tray-header-left svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tray-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+  }
+
+  .tray-today {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .tray-hours-today {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--slug-green);
+    font-weight: 600;
+    background: var(--slug-green-dim);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* ===== QUICK LOG INPUT ===== */
+  .tray-input-area {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .tray-input-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .tray-input-what {
+    font-family: var(--font-body);
+    font-size: 13px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    outline: none;
+    flex: 1;
+    transition: all 0.15s;
+  }
+
+  .tray-input-what:focus {
+    border-color: var(--slug-green);
+    box-shadow: 0 0 0 3px var(--slug-green-glow);
+  }
+
+  .tray-input-what::placeholder {
+    color: var(--text-dim);
+  }
+
+  .tray-input-hours {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 8px 6px;
+    border-radius: var(--radius-md);
+    outline: none;
+    width: 52px;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .tray-input-hours:focus {
+    border-color: var(--slug-green);
+    box-shadow: 0 0 0 3px var(--slug-green-glow);
+  }
+
+  .tray-input-hours::placeholder {
+    color: var(--text-dim);
+  }
+
+  .tray-log-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--slug-green);
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .tray-log-btn:hover {
+    filter: brightness(1.1);
+  }
+
+  .tray-shortcut-hint {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .kbd {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--text-muted);
+  }
+
+  /* ===== TODAY'S ENTRIES ===== */
+  .tray-entries-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 4px;
+  }
+
+  .tray-entries-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+  }
+
+  .tray-entries {
+    padding: 4px 12px 8px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .tray-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    cursor: default;
+    transition: background 0.1s;
+    position: relative;
+  }
+
+  .tray-entry:hover {
+    background: var(--bg-surface);
+  }
+
+  .tray-entry-color {
+    width: 3px;
+    height: 28px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .tray-entry-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tray-entry-desc {
+    font-size: 12px;
+    color: var(--text-primary);
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tray-entry-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .tray-entry-project {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .tray-entry-area {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .tray-entry-hours {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+
+  .tray-entry-hours span {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  /* ===== TRAY FOOTER ===== */
+  .tray-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+
+  .tray-footer-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tray-footer-btn:hover {
+    background: var(--bg-card);
+    color: var(--slug-green);
+  }
+
+  .tray-footer-open {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--slug-green);
+    background: var(--slug-green-dim);
+    border: none;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .tray-footer-open:hover {
+    filter: brightness(0.95);
+  }
+
+  /* ===== SCROLLBAR ===== */
+  .tray-entries::-webkit-scrollbar { width: 4px; }
+  .tray-entries::-webkit-scrollbar-track { background: transparent; }
+  .tray-entries::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+  /* ===== DIVIDER ===== */
+  .tray-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 0 16px;
+  }
+
+  /* Week mini-bar */
+  .tray-week-bar {
+    display: flex;
+    gap: 3px;
+    padding: 6px 16px 10px;
+    align-items: flex-end;
+    height: 44px;
+  }
+
+  .tray-week-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .tray-week-bar-fill {
+    width: 100%;
+    border-radius: 2px 2px 0 0;
+    background: var(--slug-green);
+    opacity: 0.25;
+    transition: all 0.3s;
+    min-height: 2px;
+  }
+
+  .tray-week-bar-fill.active {
+    opacity: 0.6;
+  }
+
+  .tray-week-bar-fill.today {
+    opacity: 1;
+    background: var(--slug-green);
+  }
+
+  .tray-week-day-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .tray-week-day-label.today {
+    color: var(--slug-green);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- Simulated macOS menu bar -->
+<div class="menubar">
+  <div class="menubar-icons">
+    <span style="font-size: 14px;">&#x1F50B;</span>
+    <span style="font-size: 14px;">&#x1F4F6;</span>
+    <div class="menubar-slug active" title="SLOG">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="20" cy="26" rx="14" ry="8" fill="#e6f7f5" stroke="#0d9488" stroke-width="2"/>
+        <ellipse cx="24" cy="22" rx="8" ry="9" fill="#f0f1f4" stroke="#0d9488" stroke-width="1.5"/>
+        <line x1="14" y1="22" x2="11" y2="14" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="18" y1="21" x2="16" y2="13" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="11" cy="13" r="2.2" fill="#0d9488"/>
+        <circle cx="16" cy="12" r="2.2" fill="#0d9488"/>
+      </svg>
+    </div>
+    <span class="menubar-time">Sun 20 Apr 14:32</span>
+  </div>
+</div>
+
+<!-- Tray popup -->
+<div class="tray-popup">
+
+  <!-- Header -->
+  <div class="tray-header">
+    <div class="tray-header-left">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="20" cy="26" rx="14" ry="8" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.5"/>
+        <ellipse cx="24" cy="22" rx="8" ry="9" fill="#f0f1f4" stroke="#0d9488" stroke-width="1.2"/>
+        <path d="M24 14 Q28 16 28 20 Q28 24 24 25 Q20 25 20 21 Q20 18 23 17" stroke="#0d9488" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <line x1="14" y1="22" x2="11" y2="14" stroke="#0d9488" stroke-width="1.2" stroke-linecap="round"/>
+        <line x1="18" y1="21" x2="16" y2="13" stroke="#0d9488" stroke-width="1.2" stroke-linecap="round"/>
+        <circle cx="11" cy="13" r="2" fill="#0d9488"/>
+        <circle cx="16" cy="12" r="2" fill="#0d9488"/>
+        <circle cx="11" cy="12.5" r="0.8" fill="#1a1d2b"/>
+        <circle cx="16" cy="11.5" r="0.8" fill="#1a1d2b"/>
+        <path d="M12 25 Q15 27 18 25" stroke="#0d9488" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="tray-title">SLOG</div>
+        <div class="tray-today">Friday, Apr 18</div>
+      </div>
+    </div>
+    <div class="tray-hours-today">2.5h today</div>
+  </div>
+
+  <!-- Quick input -->
+  <div class="tray-input-area">
+    <div class="tray-input-row">
+      <input class="tray-input-what" type="text" placeholder="What did you do?" autofocus>
+      <input class="tray-input-hours" type="text" placeholder="1h">
+      <button class="tray-log-btn">LOG</button>
+    </div>
+    <div class="tray-shortcut-hint">
+      <kbd class="kbd">&#x2318;&#x21E7;L</kbd> to open &middot; <kbd class="kbd">&#x21A9;</kbd> to log
+    </div>
+  </div>
+
+  <!-- Week mini bar chart -->
+  <div class="tray-week-bar">
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill active" style="height: 22px;"></div>
+      <span class="tray-week-day-label">M</span>
+    </div>
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill active" style="height: 26px;"></div>
+      <span class="tray-week-day-label">T</span>
+    </div>
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill active" style="height: 20px;"></div>
+      <span class="tray-week-day-label">W</span>
+    </div>
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill active" style="height: 24px;"></div>
+      <span class="tray-week-day-label">T</span>
+    </div>
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill today" style="height: 8px;"></div>
+      <span class="tray-week-day-label today">F</span>
+    </div>
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill" style="height: 2px;"></div>
+      <span class="tray-week-day-label">S</span>
+    </div>
+    <div class="tray-week-day">
+      <div class="tray-week-bar-fill" style="height: 2px;"></div>
+      <span class="tray-week-day-label">S</span>
+    </div>
+  </div>
+
+  <div class="tray-divider"></div>
+
+  <!-- Today's entries -->
+  <div class="tray-entries-header">
+    <span class="tray-entries-label">Today</span>
+    <span class="tray-entries-label">2 entries</span>
+  </div>
+  <div class="tray-entries">
+    <div class="tray-entry">
+      <div class="tray-entry-color" style="background: var(--color-investigating);"></div>
+      <div class="tray-entry-info">
+        <div class="tray-entry-desc">Reviewed Project Radar, RDS, ResourceFlow overlap</div>
+        <div class="tray-entry-meta">
+          <span class="tray-entry-project">AI Software & Apps</span>
+          <span class="tray-entry-area" style="color: var(--color-investigating); background: var(--color-investigating-bg);">Investigating</span>
+        </div>
+      </div>
+      <div class="tray-entry-hours">1.5<span>h</span></div>
+    </div>
+    <div class="tray-entry">
+      <div class="tray-entry-color" style="background: var(--color-programming);"></div>
+      <div class="tray-entry-info">
+        <div class="tray-entry-desc">SLOG design mockup with Claude</div>
+        <div class="tray-entry-meta">
+          <span class="tray-entry-project">AI Software & Apps</span>
+          <span class="tray-entry-area" style="color: var(--color-programming); background: var(--color-programming-bg);">Programming</span>
+        </div>
+      </div>
+      <div class="tray-entry-hours">1.0<span>h</span></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="tray-footer">
+    <button class="tray-footer-btn">Week: 31.5h</button>
+    <button class="tray-footer-open">Open SLOG &#x2192;</button>
+  </div>
+
+</div>
+
+</body>
+</html>

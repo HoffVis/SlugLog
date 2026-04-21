@@ -1,0 +1,15 @@
+[package]
+name = "slog-cli"
+description = "CLI tool for SLOG — log entries from terminal or Claude Code"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "slog"
+path = "src/main.rs"
+
+[dependencies]
+slog-core = { workspace = true }
+clap = { workspace = true }
+chrono = { workspace = true }
+serde_json = { workspace = true }

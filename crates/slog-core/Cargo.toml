@@ -1,0 +1,13 @@
+[package]
+name = "slog-core"
+description = "Shared data layer for SLOG — types, SQLite, queries"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+rusqlite = { workspace = true }
+uuid = { workspace = true }
+dirs = { workspace = true }

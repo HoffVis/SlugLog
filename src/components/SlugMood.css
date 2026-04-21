@@ -1,0 +1,47 @@
+.slug-mood {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.slug-mood-media {
+  display: flex;
+  justify-content: center;
+}
+
+.slug-mood-img,
+.slug-mood-video {
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
+/* Sizes */
+.slug-mood-small .slug-mood-img,
+.slug-mood-small .slug-mood-video {
+  width: 80px;
+  height: 80px;
+}
+
+.slug-mood-medium .slug-mood-img,
+.slug-mood-medium .slug-mood-video {
+  width: 150px;
+  height: 150px;
+}
+
+.slug-mood-large .slug-mood-img,
+.slug-mood-large .slug-mood-video {
+  width: 220px;
+  height: 220px;
+}
+
+.slug-mood-message {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 300px;
+  line-height: 1.5;
+  font-style: italic;
+}

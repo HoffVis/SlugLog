@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+@import './theme.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+/* Reset native select styling */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a90a5' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px !important;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Area color utility classes */
+.area-color-programming { color: var(--color-programming); }
+.area-color-testing { color: var(--color-testing); }
+.area-color-bug_solving { color: var(--color-bug); }
+.area-color-meeting { color: var(--color-meeting); }
+.area-color-documenting { color: var(--color-documenting); }
+.area-color-investigating { color: var(--color-investigating); }
+
+.area-bg-programming { background: var(--color-programming-bg); }
+.area-bg-testing { background: var(--color-testing-bg); }
+.area-bg-bug_solving { background: var(--color-bug-bg); }
+.area-bg-meeting { background: var(--color-meeting-bg); }
+.area-bg-documenting { background: var(--color-documenting-bg); }
+.area-bg-investigating { background: var(--color-investigating-bg); }
+
+.area-border-programming { border-color: var(--color-programming); }
+.area-border-testing { border-color: var(--color-testing); }
+.area-border-bug_solving { border-color: var(--color-bug); }
+.area-border-meeting { border-color: var(--color-meeting); }
+.area-border-documenting { border-color: var(--color-documenting); }
+.area-border-investigating { border-color: var(--color-investigating); }
