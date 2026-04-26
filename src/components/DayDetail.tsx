@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AREA_LABELS, AREAS } from "../lib/types";
-import { deleteEntry, updateEntry } from "../lib/commands";
-import type { Entry, TaskArea } from "../lib/types";
+import { deleteEntry, updateEntry, getProjects } from "../lib/commands";
+import type { Entry, Project, TaskArea } from "../lib/types";
 import "./DayDetail.css";
 
 interface DayDetailProps {
@@ -87,6 +87,20 @@ function EditableEntryCard({
   const [output, setOutput] = useState(entry.output ?? "");
   const [notes, setNotes] = useState(entry.notes ?? "");
   const [saving, setSaving] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    getProjects().then(setProjects).catch(() => {});
+  }, []);
+
+  const handleProjectSelect = (value: string) => {
+    setProject(value);
+    const match = projects.find((p) => p.name === value);
+    if (match) {
+      if (match.project_number) setPn(match.project_number);
+      if (match.default_area) setArea(match.default_area);
+    }
+  };
 
   const areaClass = entry.area ?? "";
   const areaLabel = entry.area ? AREA_LABELS[entry.area as TaskArea] : null;
@@ -125,7 +139,12 @@ function EditableEntryCard({
           </div>
           <div className="edit-field">
             <label className="edit-label">Project</label>
-            <input className="edit-input" value={project} onChange={(e) => setProject(e.target.value)} placeholder="Project name" />
+            <input className="edit-input" list="edit-project-list" value={project} onChange={(e) => handleProjectSelect(e.target.value)} placeholder="Project name" />
+            <datalist id="edit-project-list">
+              {projects.map((p) => (
+                <option key={p.id} value={p.name}>{p.project_number ? `#${p.project_number}` : ""}</option>
+              ))}
+            </datalist>
           </div>
           <div className="edit-field">
             <label className="edit-label">PN</label>

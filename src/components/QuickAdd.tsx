@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AREAS, AREA_LABELS } from "../lib/types";
+import type { Project } from "../lib/types";
+import { getProjects } from "../lib/commands";
 import { formatDate } from "../lib/dates";
 import "./QuickAdd.css";
 
@@ -27,6 +29,20 @@ export function QuickAdd({ onSubmit }: QuickAddProps) {
   const [output, setOutput] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    getProjects().then(setProjects).catch(() => {});
+  }, []);
+
+  const handleProjectSelect = (value: string) => {
+    setProject(value);
+    const match = projects.find((p) => p.name === value);
+    if (match) {
+      if (match.project_number) setPn(match.project_number);
+      if (match.default_area) setArea(match.default_area);
+    }
+  };
 
   const isToday = date === formatDate(new Date());
 
@@ -115,10 +131,18 @@ export function QuickAdd({ onSubmit }: QuickAddProps) {
             <input
               className="quick-add-input"
               type="text"
+              list="project-list"
               placeholder="Reflect Color Studio"
               value={project}
-              onChange={(e) => setProject(e.target.value)}
+              onChange={(e) => handleProjectSelect(e.target.value)}
             />
+            <datalist id="project-list">
+              {projects.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.project_number ? `#${p.project_number}` : ""}
+                </option>
+              ))}
+            </datalist>
           </div>
           <div className="quick-add-field pn">
             <label className="quick-add-label">PN</label>
