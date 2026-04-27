@@ -58,7 +58,15 @@ Every timetracker you've tried felt like homework. The slug is different. It doe
 
 When you stop a timer, the slug doesn't just log raw elapsed time. It checks your daily budget (default 8h with 1h breathing room) and caps the proposed hours to fit. Because nobody actually works 8 focused hours in a day, and pretending otherwise helps no one.
 
-## Getting Started
+## Download
+
+**[Download SlugLog v0.1.0 for macOS](https://github.com/HoffVis/SlugLog/releases/latest)** (Apple Silicon)
+
+> **First launch:** macOS may block the app since it's unsigned. Right-click the app and select Open, or run the included `install.command` to fix this automatically.
+
+Windows and Linux users can build from source (see below).
+
+## Build from Source
 
 ### Prerequisites
 
@@ -71,7 +79,7 @@ When you stop a timer, the slug doesn't just log raw elapsed time. It checks you
 ```bash
 # Clone
 git clone https://github.com/HoffVis/SlugLog.git
-cd slog
+cd SlugLog
 
 # Install JS dependencies
 npm install
@@ -86,10 +94,10 @@ npm run tauri:build
 ### Install the CLI
 
 ```bash
-cargo install --path crates/slog-cli
+cargo install --path crates/sluglog-cli
 ```
 
-This installs the `slug` command. The CLI and the desktop app share the same SQLite database at `~/Documents/slog/slog.db`.
+This installs the `slug` command. The CLI and the desktop app share the same SQLite database at `~/Documents/sluglog/sluglog.db`.
 
 ## CLI Usage
 
