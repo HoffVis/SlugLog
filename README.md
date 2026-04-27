@@ -5,7 +5,7 @@
 <h1 align="center">SlugLog</h1>
 
 <p align="center">
-  <strong>Dev journal & timetracker for people who do great work but forget to write it down.</strong><br/>
+  <strong>For people who do great work but forget to write it down.</strong><br/>
   A dev journal that doubles as a timesheet cheat-sheet — because<br/>
   "what did I even do this week?" shouldn't be a Friday crisis.
 </p>
@@ -22,21 +22,27 @@
 
 SlugLog is a desktop app + CLI for logging your dev work. Two fields — description and hours. Everything else is optional.
 
-It comes with a slug. The slug lives in your menu bar. If you don't log your work, the slug dies. Turns out, that's the only motivation that actually works.
+It comes with a slug. The slug lives in your menu bar. If you don't log your work, the slug dies. Turns out, that's the only motivation that actually works — not a system to follow, but a creature to keep alive.
 
-## Features
+## How it works
 
-**sLog** — Weekly timeline view, git-graph style. Click any day to see details and edit entries. Quick-add bar for logging in seconds.
+**sLog — Weekly Timeline**
+Your week at a glance — entries shown as a git-graph style timeline. Click any day to see details and edit entries. Use the quick-add bar to log something in seconds.
 
-**sBoard** — Simple kanban board (To Do / In Progress / Done). Start a timer on any ticket — when you stop it, hours are automatically logged. One timer at a time.
+**sBoard — Ticket Board**
+Simple kanban board — To Do, In Progress, Done. Start a timer on any ticket, and when you stop it, the hours are automatically logged to the sLog. One timer at a time, auto-stops the previous.
 
-**sProjects** — Configure projects with names, project numbers, and default task areas. Details carry over to log entries automatically.
+**sProjects — Project Config**
+Set up your projects with names, project numbers, and default task areas. When a ticket is linked to a project, the details carry over to the log entry automatically.
 
-**Tray Popup** — Quick-add from the menu bar without opening the full app. See today's entries and your week at a glance.
+**Tray Popup**
+The slug lives in your menu bar. Click it for a quick-add popup — log something in seconds without opening the full app. See today's entries and the week bar at a glance. The app stays running when you close the window.
 
-**CLI** — Log from your terminal with `slug start`, `slug stop`, `slug log`. Same database, same slug.
+**CLI**
+Log from your terminal with `slug start`, `slug stop`, `slug log`. Same database, same slug.
 
-**Sync Indicator** — Mark entries as "synced" when you've transferred them to your timesheet or invoice. Synced entries fade out so you can see what's left.
+**Sync Indicator**
+Hover over any entry in the timeline to see a small checkbox. Click it to mark the entry as "synced" — meaning you've transferred it to your timesheet, invoice, or wherever it needs to go. Synced entries fade out so you can see at a glance what's been handled and what hasn't.
 
 ## The Slug
 
@@ -45,18 +51,27 @@ Every timetracker you've tried felt like homework. The slug is different. It doe
 | Mood | Trigger |
 |------|---------|
 | Amazed | 8+ hours logged |
-| Impressed | 6–8 hours logged |
-| Happy | 4–6 hours logged |
+| Impressed | 6-8 hours logged |
+| Happy | 4-6 hours logged |
 | Worried | 1 working day without logging |
 | Judgemental | 2 days without logging |
 | Existential Crisis | 3 days without logging |
-| Hungry | 4–5 days without logging |
-| Dying | 6–9 days without logging |
+| Hungry | 4-5 days without logging |
+| Dying | 6-9 days without logging |
 | Ghost | 10+ days — the slug is gone. You did this. |
+| Vacation | Vacation mode |
 
 ### Slug Budget
 
-When you stop a timer, the slug doesn't just log raw elapsed time. It checks your daily budget (default 8h with 1h breathing room) and caps the proposed hours to fit. Because nobody actually works 8 focused hours in a day, and pretending otherwise helps no one.
+When you stop a timer, the slug doesn't just log the raw elapsed time. It checks your daily budget (default 8h with 1h air) and caps the proposed hours to fit. Because nobody actually works 8 focused hours in a day, and pretending otherwise helps no one. The slug keeps it honest, so you don't have to feel bad about being human.
+
+## Philosophy
+
+- **Two fields, not twenty.** Description and hours. Everything else is optional. If logging feels like work, you won't do it.
+- **Messy is fine.** Forgot the project name? Log it anyway. You can fix it later. A vague entry is infinitely better than no entry.
+- **Not a system. A companion.** No workflows to learn. No processes to follow. Just you, a slug, and whatever you managed to get done today.
+
+> *"But why a slug?"* — If you're asking that, you're asking the only wrong question.
 
 ## Download
 
@@ -133,12 +148,6 @@ slug week    # Week summary by day and project
 ## Claude Code Integration
 
 Run `slug-init` in any project directory to add SlugLog instructions to your `CLAUDE.md`. This teaches Claude Code to use `slug start` / `slug stop` while working, so your AI pair-programmer logs its own time.
-
-## Philosophy
-
-- **Two fields, not twenty.** Description and hours. Everything else is optional. If logging feels like work, you won't do it.
-- **Messy is fine.** Forgot the project name? Log it anyway. You can fix it later. A vague entry is infinitely better than no entry.
-- **Not a system. A companion.** No workflows to learn. No processes to follow. Just you, a slug, and whatever you managed to get done today.
 
 ## Tech Stack
 
