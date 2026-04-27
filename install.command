@@ -9,7 +9,7 @@
 #  You only need to run this ONCE after downloading.
 # ═══════════════════════════════════════════════════════════
 
-APP_NAME="SLOG.app"
+APP_NAME="SlugLog.app"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_PATH="$SCRIPT_DIR/$APP_NAME"
 

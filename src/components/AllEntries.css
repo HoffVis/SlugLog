@@ -1,0 +1,91 @@
+.all-entries {
+  padding: 1.5rem 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.all-entries-header {
+  margin-bottom: 1.5rem;
+}
+
+.all-entries-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.all-entries-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.all-entries-stats {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.all-entries-search {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.all-entries-search:focus {
+  border-color: var(--slug-green);
+}
+
+.all-entries-search::placeholder {
+  color: var(--text-muted);
+}
+
+.all-entries-loading,
+.all-entries-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 3rem 0;
+  font-size: 0.9rem;
+}
+
+.all-entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.all-entries-day {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.all-entries-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: 0.25rem;
+}
+
+.all-entries-day-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.all-entries-day-hours {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}

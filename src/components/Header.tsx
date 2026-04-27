@@ -11,8 +11,8 @@ interface HeaderProps {
   onToday: () => void;
   theme: "light" | "dark" | "midnight";
   onToggleTheme: () => void;
-  view: "log" | "board" | "projects" | "cli" | "about";
-  onViewChange: (view: "log" | "board" | "projects" | "cli" | "about") => void;
+  view: "log" | "board" | "projects" | "all" | "cli" | "about";
+  onViewChange: (view: "log" | "board" | "projects" | "all" | "cli" | "about") => void;
 }
 
 export function Header({
@@ -35,7 +35,7 @@ export function Header({
     <header className="header">
       <div className="header-left">
         <div className="logo-mark">
-          <img src={slugLogo} alt="SLOG" className="logo-img" />
+          <img src={slugLogo} alt="SlugLog" className="logo-img" />
         </div>
         <div className="logo-text">
           <div className="logo-title">SlugLog</div>
@@ -50,6 +50,12 @@ export function Header({
             onClick={() => onViewChange("log")}
           >
             sLog
+          </button>
+          <button
+            className={`view-tab ${view === "all" ? "active" : ""}`}
+            onClick={() => onViewChange("all")}
+          >
+            All Entries
           </button>
           <button
             className={`view-tab ${view === "board" ? "active" : ""}`}

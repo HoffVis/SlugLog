@@ -16,6 +16,7 @@ pub fn run() {
             commands::get_entries_for_week,
             commands::get_entries_for_date,
             commands::get_today_entries,
+            commands::get_all_entries,
             commands::create_entry,
             commands::update_entry,
             commands::toggle_synced,
@@ -39,8 +40,8 @@ pub fn run() {
         ])
         .setup(|app| {
             // Initialize the database
-            let db = slog_core::Database::open_default()
-                .expect("Failed to open SLOG database");
+            let db = sluglog_core::Database::open_default()
+                .expect("Failed to open SlugLog database");
             app.manage(std::sync::Mutex::new(db));
 
             // Morning reminder — check every 60s, pop up at 9:00 if slug is neglected
@@ -61,7 +62,7 @@ pub fn run() {
                         && last_shown_date != today
                     {
                         // Check if they've logged anything today
-                        if let Some(db_state) = reminder_handle.try_state::<std::sync::Mutex<slog_core::Database>>() {
+                        if let Some(db_state) = reminder_handle.try_state::<std::sync::Mutex<sluglog_core::Database>>() {
                             if let Ok(db) = db_state.lock() {
                                 let today_hours = db.get_hours_for_date(&today).unwrap_or(0.0);
                                 if today_hours < 1.0 {
@@ -157,5 +158,5 @@ pub fn run() {
             }
         })
         .run(tauri::generate_context!())
-        .expect("error while running SLOG");
+        .expect("error while running SlugLog");
 }

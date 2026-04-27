@@ -41,7 +41,7 @@ export function CliPage() {
         </p>
         <CodeBlock
           label="Add to ~/.zshrc"
-          code='export PATH="/Users/th2025/Desktop/BBS_APPS/SLOG/target/debug:$PATH"'
+          code='export PATH="$HOME/.cargo/bin:$PATH"'
         />
         <CodeBlock
           label="Add SlugLog to a project's CLAUDE.md"

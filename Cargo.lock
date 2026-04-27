@@ -3341,14 +3341,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
-name = "slog-app"
+name = "sluglog-app"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "log",
  "serde",
  "serde_json",
- "slog-core",
+ "sluglog-core",
  "tauri",
  "tauri-build",
  "tauri-plugin-shell",
@@ -3356,17 +3356,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "slog-cli"
+name = "sluglog-cli"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
  "serde_json",
- "slog-core",
+ "sluglog-core",
 ]
 
 [[package]]
-name = "slog-core"
+name = "sluglog-core"
 version = "0.1.0"
 dependencies = [
  "chrono",

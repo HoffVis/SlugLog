@@ -16,7 +16,7 @@ export function TrayPopup() {
 
   // Sync theme from localStorage (set by main window)
   useEffect(() => {
-    const theme = localStorage.getItem("slog-theme") || "light";
+    const theme = localStorage.getItem("sluglog-theme") || "light";
     document.documentElement.setAttribute("data-theme", theme);
   }, []);
 
@@ -195,7 +195,7 @@ export function TrayPopup() {
           Week: {summary?.total_hours.toFixed(1) ?? "0.0"}h
         </span>
         <button className="tray-footer-open" onClick={openMainWindow}>
-          Open SLOG &rarr;
+          Open SlugLog &rarr;
         </button>
       </div>
     </div>

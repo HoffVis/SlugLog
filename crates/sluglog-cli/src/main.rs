@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use chrono::Datelike;
-use slog_core::{Database, NewEntry, TaskArea};
+use sluglog_core::{Database, NewEntry, TaskArea};
 
 #[derive(Parser)]
 #[command(name = "slug", about = "SlugLog — Dev Journal & Timetracker CLI")]
@@ -47,7 +47,7 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
-    let db = Database::open_default().expect("Failed to open SLOG database");
+    let db = Database::open_default().expect("Failed to open SlugLog database");
 
     match cli.command {
         Commands::Log {
@@ -169,7 +169,7 @@ fn main() {
             if let Some(ref p) = project {
                 println!("  Project: {}", p);
             }
-            println!("  Run `slog stop` when done.");
+            println!("  Run `slug stop` when done.");
         }
         Commands::Stop => {
             // Find the running ticket
@@ -206,7 +206,7 @@ fn main() {
                     println!("  Today: {:.1}h logged", result.logged_today + result.proposed_hours);
                 }
                 None => {
-                    println!("No timer running. Start one with `slog start \"task name\"`");
+                    println!("No timer running. Start one with `slug start \"task name\"`");
                 }
             }
         }
@@ -235,7 +235,7 @@ fn main() {
                     if let Some(ref p) = ticket.project {
                         println!("  Project: {}", p);
                     }
-                    println!("  Run `slog stop` to log it.");
+                    println!("  Run `slug stop` to log it.");
                 }
                 None => {
                     println!("No timer running.");

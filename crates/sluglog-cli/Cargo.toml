@@ -1,6 +1,6 @@
 [package]
-name = "slog-cli"
-description = "CLI tool for SLOG — log entries from terminal or Claude Code"
+name = "sluglog-cli"
+description = "CLI tool for SlugLog — log entries from terminal or Claude Code"
 version.workspace = true
 edition.workspace = true
 
@@ -9,7 +9,7 @@ name = "slug"
 path = "src/main.rs"
 
 [dependencies]
-slog-core = { workspace = true }
+sluglog-core = { workspace = true }
 clap = { workspace = true }
 chrono = { workspace = true }
 serde_json = { workspace = true }

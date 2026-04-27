@@ -16,6 +16,10 @@ export async function getTodayEntries(): Promise<Entry[]> {
   return invoke("get_today_entries");
 }
 
+export async function getAllEntries(): Promise<Entry[]> {
+  return invoke("get_all_entries");
+}
+
 export async function createEntry(params: {
   description: string;
   hours: number;

@@ -9,6 +9,7 @@ import { Board } from "./components/Board";
 import { Projects } from "./components/Projects";
 import { CliPage } from "./components/CliPage";
 import { About } from "./components/About";
+import { AllEntries } from "./components/AllEntries";
 import { SlugReminder } from "./components/SlugReminder";
 import { TrayPopup } from "./components/TrayPopup";
 import { getISOWeek } from "./lib/dates";
@@ -30,10 +31,10 @@ export default function App() {
   const [summary, setSummary] = useState<WeekSummary | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"log" | "board" | "projects" | "cli" | "about">("log");
+  const [view, setView] = useState<"log" | "board" | "projects" | "all" | "cli" | "about">("log");
   const [showReminder, setShowReminder] = useState(() => {
     // Show reminder once per day
-    const lastDismissed = localStorage.getItem("slog-reminder-dismissed");
+    const lastDismissed = localStorage.getItem("sluglog-reminder-dismissed");
     const today = new Date().toISOString().split("T")[0];
     return lastDismissed !== today;
   });
@@ -41,7 +42,7 @@ export default function App() {
   const dismissReminder = () => {
     setShowReminder(false);
     const today = new Date().toISOString().split("T")[0];
-    localStorage.setItem("slog-reminder-dismissed", today);
+    localStorage.setItem("sluglog-reminder-dismissed", today);
   };
 
   // Listen for Rust-side reminder trigger (9:00 AM popup)
@@ -65,12 +66,12 @@ export default function App() {
   type Theme = (typeof THEMES)[number];
 
   const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem("slog-theme") as Theme) || "light";
+    return (localStorage.getItem("sluglog-theme") as Theme) || "light";
   });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("slog-theme", theme);
+    localStorage.setItem("sluglog-theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -199,6 +200,8 @@ export default function App() {
         <Board />
       ) : view === "projects" ? (
         <Projects />
+      ) : view === "all" ? (
+        <AllEntries />
       ) : view === "cli" ? (
         <CliPage />
       ) : (

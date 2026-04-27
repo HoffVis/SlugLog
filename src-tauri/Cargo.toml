@@ -1,11 +1,11 @@
 [package]
-name = "slog-app"
-description = "SLOG — Dev Journal & Timetracker desktop app"
+name = "sluglog-app"
+description = "SlugLog — Dev Journal & Timetracker desktop app"
 version.workspace = true
 edition.workspace = true
 
 [lib]
-name = "slog_app_lib"
+name = "sluglog_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -13,7 +13,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 # Workspace crates
-slog-core = { workspace = true }
+sluglog-core = { workspace = true }
 
 # Tauri
 tauri = { version = "2", features = ["tray-icon"] }

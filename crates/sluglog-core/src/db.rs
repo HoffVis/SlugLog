@@ -8,18 +8,32 @@ pub struct Database {
 }
 
 impl Database {
-    /// Open the database at the default location: ~/Documents/slog/slog.db
+    /// Open the database at the default location: ~/Documents/sluglog/sluglog.db
     pub fn open_default() -> SqlResult<Self> {
         let path = Self::default_path();
         Self::open(&path)
     }
 
     pub fn default_path() -> PathBuf {
-        let dir = dirs::document_dir()
-            .unwrap_or_else(|| dirs::home_dir().unwrap())
-            .join("slog");
-        std::fs::create_dir_all(&dir).ok();
-        dir.join("slog.db")
+        let docs = dirs::document_dir()
+            .unwrap_or_else(|| dirs::home_dir().unwrap());
+        let new_dir = docs.join("sluglog");
+        let new_db = new_dir.join("sluglog.db");
+
+        // Migrate from old ~/Documents/slog/slog.db if it exists
+        if !new_db.exists() {
+            let old_db = docs.join("slog").join("slog.db");
+            if old_db.exists() {
+                std::fs::create_dir_all(&new_dir).ok();
+                std::fs::rename(&old_db, &new_db).ok();
+                // Clean up old directory if empty
+                std::fs::remove_dir(docs.join("slog")).ok();
+                return new_db;
+            }
+        }
+
+        std::fs::create_dir_all(&new_dir).ok();
+        new_db
     }
 
     pub fn open(path: &PathBuf) -> SqlResult<Self> {
@@ -212,6 +226,34 @@ impl Database {
         )?;
         let entries = stmt
             .query_map(params![start, end], |row| {
+                Ok(Entry {
+                    id: row.get(0)?,
+                    timestamp: row.get(1)?,
+                    date: row.get(2)?,
+                    time: row.get(3)?,
+                    description: row.get(4)?,
+                    hours: row.get(5)?,
+                    project: row.get(6)?,
+                    project_number: row.get(7)?,
+                    area: row
+                        .get::<_, Option<String>>(8)?
+                        .and_then(|a| TaskArea::from_str(&a)),
+                    output: row.get(9)?,
+                    notes: row.get(10)?,
+                    synced: row.get::<_, i32>(11).unwrap_or(0) != 0,
+                })
+            })?
+            .collect::<SqlResult<Vec<_>>>()?;
+        Ok(entries)
+    }
+
+    pub fn get_all_entries(&self) -> SqlResult<Vec<Entry>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, timestamp, date, time, description, hours, project, project_number, area, output, notes, COALESCE(synced, 0) as synced
+             FROM entries ORDER BY date DESC, time DESC",
+        )?;
+        let entries = stmt
+            .query_map([], |row| {
                 Ok(Entry {
                     id: row.get(0)?,
                     timestamp: row.get(1)?,

@@ -1,6 +1,6 @@
 [package]
-name = "slog-core"
-description = "Shared data layer for SLOG — types, SQLite, queries"
+name = "sluglog-core"
+description = "Shared data layer for SlugLog — types, SQLite, queries"
 version.workspace = true
 edition.workspace = true
 

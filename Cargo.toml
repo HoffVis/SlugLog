@@ -1,18 +1,18 @@
-# SLOG - Dev Journal & Timetracker
+# SlugLog - Dev Journal & Timetracker
 # Cargo Workspace: shared core crate, Tauri app, CLI binary
 
 [workspace]
 resolver = "2"
 members = [
-    "crates/slog-core",
-    "crates/slog-cli",
+    "crates/sluglog-core",
+    "crates/sluglog-cli",
     "src-tauri",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["Brother, Brother & Sons"]
+authors = ["Tobias Hoffmann"]
 license = "MIT"
 
 [workspace.dependencies]
@@ -39,7 +39,7 @@ log = "0.4"
 dirs = "5"
 
 # Workspace crates
-slog-core = { path = "crates/slog-core" }
+sluglog-core = { path = "crates/sluglog-core" }
 
 [profile.release]
 codegen-units = 1

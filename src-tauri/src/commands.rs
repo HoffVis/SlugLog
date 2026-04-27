@@ -1,4 +1,4 @@
-use slog_core::{Database, Entry, NewEntry, Project, SlugStatus, StopResult, TaskArea, Ticket, TicketStatus, WeekSummary};
+use sluglog_core::{Database, Entry, NewEntry, Project, SlugStatus, StopResult, TaskArea, Ticket, TicketStatus, WeekSummary};
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
 
@@ -106,6 +106,12 @@ pub fn get_week_summary(
 ) -> Result<WeekSummary, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.get_week_summary(year, week).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_all_entries(db: State<DbState>) -> Result<Vec<Entry>, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_all_entries().map_err(|e| e.to_string())
 }
 
 // ===== TICKETS =====

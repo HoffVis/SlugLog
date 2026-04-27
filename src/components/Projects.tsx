@@ -63,7 +63,7 @@ export function Projects() {
         <h2 className="projects-title">Projects</h2>
         <p className="projects-subtitle">
           Configure your projects here. When a ticket is linked to a project,
-          the project number and default area carry over to the slog entry automatically.
+          the project number and default area carry over to the log entry automatically.
         </p>
       </div>
 
