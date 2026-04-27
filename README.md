@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="SLOG_Icon_Final.png" width="128" alt="SlugLog icon" />
+  <img src="docs/icon.png" width="128" alt="SlugLog icon" />
 </p>
 
 <h1 align="center">SlugLog</h1>

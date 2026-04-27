@@ -3,3 +3,10 @@ target/
 dist/
 .DS_Store
 *.db
+
+# Local dev files
+mockup.html
+mockup-tray.html
+SLOG_CLI_INSTRUCTIONS.md
+slugtraycon512x512.png
+SLOG_Icon_Final.png
