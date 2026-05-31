@@ -237,6 +237,7 @@ export default function App() {
               entries={entries.filter((e) => e.date === selectedDate)}
               onClose={() => setSelectedDate(null)}
               onUpdate={loadData}
+              onCreate={handleAddEntry}
             />
           )}
         </>
