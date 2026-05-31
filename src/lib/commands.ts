@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { Entry, Project, StopResult, Ticket, WeekSummary } from "./types";
+import type { Creature, CreatureState, DayCommitGroup, Entry, Project, StopResult, Ticket, WeekSummary } from "./types";
 
 export async function getEntriesForWeek(
   year: number,
@@ -189,4 +189,44 @@ export async function updateProject(params: {
 
 export async function deleteProject(id: string): Promise<void> {
   return invoke("delete_project", { id });
+}
+
+// ===== CREATURES =====
+
+export async function getCreatureState(): Promise<CreatureState> {
+  return invoke("get_creature_state");
+}
+
+export async function hatchCreature(
+  creatureType: string,
+  name?: string
+): Promise<Creature> {
+  return invoke("hatch_creature", {
+    creatureType,
+    name: name ?? null,
+  });
+}
+
+export async function getGraveyard(): Promise<Creature[]> {
+  return invoke("get_graveyard");
+}
+
+export async function nameCreature(id: string, name: string): Promise<void> {
+  return invoke("name_creature", { id, name });
+}
+
+// ===== VACATION =====
+
+export async function getVacationMode(): Promise<boolean> {
+  return invoke("get_vacation_mode");
+}
+
+export async function setVacationMode(on: boolean): Promise<void> {
+  return invoke("set_vacation_mode", { on });
+}
+
+// ===== GIT COMMITS (memory aid, not persisted) =====
+
+export async function getCommitsForDate(date: string): Promise<DayCommitGroup[]> {
+  return invoke("get_commits_for_date", { date });
 }

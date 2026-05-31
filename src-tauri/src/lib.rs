@@ -1,4 +1,5 @@
 mod commands;
+mod git_commits;
 
 use chrono::Datelike;
 use chrono::Timelike;
@@ -33,10 +34,17 @@ pub fn run() {
             commands::start_timer,
             commands::stop_timer,
             commands::confirm_stop,
+            commands::get_creature_state,
+            commands::hatch_creature,
+            commands::get_graveyard,
+            commands::name_creature,
+            commands::get_vacation_mode,
+            commands::set_vacation_mode,
             commands::get_projects,
             commands::create_project,
             commands::update_project,
             commands::delete_project,
+            commands::get_commits_for_date,
         ])
         .setup(|app| {
             // Initialize the database
@@ -64,6 +72,11 @@ pub fn run() {
                         // Check if they've logged anything today
                         if let Some(db_state) = reminder_handle.try_state::<std::sync::Mutex<sluglog_core::Database>>() {
                             if let Ok(db) = db_state.lock() {
+                                // Skip reminder if vacation mode is on
+                                if db.get_vacation_mode() {
+                                    last_shown_date = today.clone();
+                                    continue;
+                                }
                                 let today_hours = db.get_hours_for_date(&today).unwrap_or(0.0);
                                 if today_hours < 1.0 {
                                     // Show the main window with the reminder

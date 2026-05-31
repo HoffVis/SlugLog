@@ -10,9 +10,10 @@ import { Projects } from "./components/Projects";
 import { CliPage } from "./components/CliPage";
 import { About } from "./components/About";
 import { AllEntries } from "./components/AllEntries";
+import { Habitat } from "./components/Habitat";
 import { SlugReminder } from "./components/SlugReminder";
 import { TrayPopup } from "./components/TrayPopup";
-import { getISOWeek } from "./lib/dates";
+import { getISOWeek, formatDate } from "./lib/dates";
 import { getEntriesForWeek, getWeekSummary, createEntry, createEntryWithDate } from "./lib/commands";
 import type { Entry, WeekSummary } from "./lib/types";
 import "./styles/app.css";
@@ -31,7 +32,7 @@ export default function App() {
   const [summary, setSummary] = useState<WeekSummary | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"log" | "board" | "projects" | "all" | "cli" | "about">("log");
+  const [view, setView] = useState<"log" | "board" | "projects" | "all" | "habitat" | "cli" | "about">("log");
   const [showReminder, setShowReminder] = useState(() => {
     // Show reminder once per day
     const lastDismissed = localStorage.getItem("sluglog-reminder-dismissed");
@@ -96,6 +97,23 @@ export default function App() {
 
   useEffect(() => {
     loadData();
+  }, [loadData]);
+
+  // Day rollover — if the app stays open past midnight, jump to today's week
+  // and force a refresh so "today" highlighting + day_hours stay accurate.
+  useEffect(() => {
+    let lastDay = formatDate(new Date());
+    const interval = setInterval(() => {
+      const today = formatDate(new Date());
+      if (today !== lastDay) {
+        lastDay = today;
+        const w = getISOWeek(new Date());
+        setYear(w.year);
+        setWeek(w.week);
+        loadData();
+      }
+    }, 30000);
+    return () => clearInterval(interval);
   }, [loadData]);
 
   // Light polling — only re-fetch if entry count changed (no unnecessary re-renders)
@@ -200,6 +218,8 @@ export default function App() {
         <Board />
       ) : view === "projects" ? (
         <Projects />
+      ) : view === "habitat" ? (
+        <Habitat />
       ) : view === "all" ? (
         <AllEntries />
       ) : view === "cli" ? (

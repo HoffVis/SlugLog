@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SlugLog — Sprite Workshop</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #e6e6e6;
+    font-family: 'Courier New', monospace;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; margin-bottom: 4px; color: #4a9c5e; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+  h2 { font-size: 15px; margin: 24px 0 12px; color: #8b949e; border-bottom: 1px solid #21262d; padding-bottom: 6px; }
+  h3 { font-size: 13px; margin: 16px 0 8px; color: #58a6ff; }
+
+  .grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .card canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 4px;
+  }
+  .card-label { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+  .card-type { font-size: 10px; color: #4a9c5e; }
+
+  .creature-row { margin-bottom: 32px; }
+  .creature-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px; padding: 8px 12px;
+    background: #161b22; border-radius: 8px; border: 1px solid #21262d;
+  }
+  .creature-icon { font-size: 20px; }
+  .creature-name { font-size: 14px; font-weight: bold; color: #e6e6e6; }
+  .creature-desc { font-size: 11px; color: #8b949e; }
+
+  .controls { margin: 16px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .controls label { font-size: 12px; color: #8b949e; }
+  .controls input[type=range] { width: 120px; }
+  .controls select, .controls button {
+    font-family: inherit; font-size: 12px;
+    background: #21262d; color: #e6e6e6;
+    border: 1px solid #30363d; border-radius: 4px;
+    padding: 4px 8px; cursor: pointer;
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: auto repeat(5, 1fr);
+    gap: 2px;
+    background: #21262d;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .compare-cell {
+    background: #161b22;
+    display: flex; align-items: center; justify-content: center;
+    padding: 4px;
+  }
+  .compare-cell canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+  .compare-label {
+    font-size: 10px; color: #8b949e;
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 6px 10px;
+    background: #0d1117;
+    display: flex; align-items: center;
+  }
+  .compare-header {
+    font-size: 11px; color: #58a6ff;
+    font-weight: bold; text-align: center;
+    padding: 8px 4px;
+    background: #0d1117;
+  }
+</style>
+</head>
+<body>
+
+<h1>Sprite Workshop</h1>
+<div class="subtitle">SlugLog creature design — 5 creatures, all moods, side-by-side</div>
+
+<!-- ===== COMPARISON MATRIX ===== -->
+<h2>All Creatures x All Moods</h2>
+<div class="compare-grid" id="compare-grid"></div>
+
+<!-- ===== PER CREATURE DETAIL ===== -->
+<h2>Creature Details</h2>
+<div id="creature-details"></div>
+
+<!-- ===== EGG STAGES ===== -->
+<h2>Egg Hatching Sequence</h2>
+<div class="grid" id="egg-gallery"></div>
+
+<!-- ===== HABITAT BACKGROUNDS ===== -->
+<h2>Habitat Backgrounds</h2>
+<div class="grid" id="bg-gallery"></div>
+
+<!-- ===== ANIMATION PREVIEW ===== -->
+<h2>Live Animation Preview</h2>
+<div class="controls">
+  <label>Creature:
+    <select id="anim-creature">
+      <option value="slug">Slug</option>
+      <option value="crab">Crab</option>
+      <option value="octopus">Octopus</option>
+      <option value="pufferfish">Pufferfish</option>
+      <option value="parrot">Parrot</option>
+    </select>
+  </label>
+  <label>Mood:
+    <select id="anim-mood">
+      <option>happy</option><option>amazed</option><option>impressed</option>
+      <option>worried</option><option>judgemental</option><option>existential</option>
+      <option>hungry</option><option>dying</option><option>ghost</option>
+      <option>weekend</option>
+    </select>
+  </label>
+</div>
+<div class="grid">
+  <div class="card">
+    <canvas id="anim-solo" width="200" height="200"></canvas>
+    <div class="card-label">Close-up</div>
+  </div>
+  <div class="card">
+    <canvas id="anim-habitat" width="400" height="300"></canvas>
+    <div class="card-label">In Habitat</div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// PALETTE
+// =============================================
+const P = {
+  eye: '#1a1a1a', eyeW: '#ffffff',
+  hat: '#5c3a1e', hatDk: '#3d2510', hatBand: '#c4a54a',
+  buckle: '#d4b44a', strap: '#7a5c3a', strapDk: '#5c3a1e',
+  metalLt: '#b0b0b0',
+  ghost: '#8888aa', ghostLt: '#aaaacc',
+  sweat: '#66ccff', sparkle: '#ffd700', tear: '#4488cc', zzz: '#aabbdd',
+  egg: '#f5e6d3', eggLt: '#faf3eb', eggSpot: '#b8d4a3', crack: '#8b7355',
+  ground: '#2d6a4f', groundDk: '#1b4332', sky: '#081c15', skyLt: '#1b4332',
+};
+
+const MOODS = ['happy','amazed','impressed','worried','judgemental','existential','hungry','dying','ghost','weekend'];
+const CREATURES = ['slug','crab','octopus','pufferfish','parrot'];
+
+const CREATURE_INFO = {
+  slug:       { icon: '🐌', name: 'Pirate Slug',   desc: 'The OG — cutlass, backpack, and eye stalks' },
+  crab:       { icon: '🦀', name: 'Hermit Crab',    desc: 'Grumpy crab with a shell — hides when scared' },
+  octopus:    { icon: '🐙', name: 'Baby Octopus',   desc: 'Wiggly tentacles — turns red when angry' },
+  pufferfish: { icon: '🐡', name: 'Pufferfish',     desc: 'Inflates with neglect — round panic ball' },
+  parrot:     { icon: '🦜', name: 'Pirate Parrot',  desc: 'Feathered companion on a perch — loses plumage' },
+};
+
+// =============================================
+// MOOD HELPERS
+// =============================================
+function moodColor(mood, base, dark, hungry, dying) {
+  if (mood === 'ghost') return P.ghost;
+  if (mood === 'dying') return dying || '#6b5c4b';
+  if (mood === 'hungry') return hungry || dark;
+  return base;
+}
+
+function drawMoodParticles(ctx, px, baseX, by, mood) {
+  const t = Date.now();
+  if (mood === 'worried') {
+    const dropY = (t / 300) % 8;
+    ctx.fillStyle = P.sweat;
+    ctx.fillRect(baseX + 12*px, by + dropY*px, px, px);
+    ctx.fillRect(baseX + 12*px, by + (dropY+1)*px, px, px);
+  }
+  if (mood === 'amazed') {
+    ctx.fillStyle = P.sparkle;
+    const sp = [[14,-1],[13,3],[15,1],[-2,0],[-1,4]];
+    for (const [sx,sy] of sp) {
+      if (Math.sin(t/200+sx*3) > 0.3) ctx.fillRect(baseX+sx*px, by+sy*px, px, px);
+    }
+  }
+  if (mood === 'existential') {
+    const dp = Math.floor(t/500)%4;
+    ctx.fillStyle = P.zzz;
+    for (let i = 0; i < Math.min(dp,3); i++) ctx.fillRect(baseX+(7+i*2)*px, by-3*px, px, px);
+  }
+  if (mood === 'hungry') {
+    if (Math.sin(t/150)>0.5) { ctx.fillStyle='#ffffff33'; ctx.fillRect(baseX+13*px,by+6*px,2*px,px); }
+  }
+  if (mood === 'dying') {
+    ctx.fillStyle = P.tear;
+    const td = (t/400)%6;
+    ctx.fillRect(baseX+8*px, by+3*px+td*px, px, px);
+  }
+  if (mood === 'weekend') {
+    const zp = Math.floor(t/600)%3;
+    const zf = [[-1,-2],[1,-4],[3,-5]];
+    for (let i=0;i<=zp;i++) {
+      ctx.fillStyle=`rgba(170,187,221,${0.8-i*0.2})`;
+      ctx.fillRect(baseX+(12+zf[i][0])*px, by+zf[i][1]*px, (2-i)*px||px, px);
+    }
+  }
+}
+
+function drawEyes(ctx, px, x1, y1, x2, y2, mood) {
+  const t = Date.now();
+  const blink = Math.sin(t/2000) > 0.92;
+
+  if (mood === 'dying') {
+    ctx.fillStyle = P.eye;
+    ctx.fillRect(x1-px, y1, px, px); ctx.fillRect(x1+px, y1+2*px, px, px);
+    ctx.fillRect(x2-px, y2, px, px); ctx.fillRect(x2+px, y2+2*px, px, px);
+    return;
+  }
+  if (blink && mood !== 'ghost') {
+    ctx.fillStyle = P.eye;
+    ctx.fillRect(x1, y1+px, px, px);
+    ctx.fillRect(x2, y2+px, px, px);
+    return;
+  }
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(x1, y1, px, 2*px);
+  ctx.fillRect(x2, y2, px, 2*px);
+  ctx.fillStyle = mood === 'amazed' ? P.sparkle : P.eye;
+  const pOff = mood === 'existential' ? px : 0;
+  ctx.fillRect(x1, y1+px+pOff, px, px);
+  ctx.fillRect(x2, y2+px+pOff, px, px);
+}
+
+// =============================================
+// SLUG
+// =============================================
+function drawSlug(ctx, px, baseX, baseY, mood) {
+  const t = Date.now();
+  const breathe = Math.sin(t/800)*px*0.5;
+  const wobble = mood==='worried' ? Math.sin(t/200)*px*0.5 : 0;
+  ctx.save(); ctx.translate(wobble, 0);
+  const bc = moodColor(mood, '#4a9c5e', '#357a47', '#7a8c3e', '#6b5c4b');
+  const bdc = moodColor(mood, '#357a47', '#2a5c35', '#5a6c2e', '#5a4a3a');
+  const blc = moodColor(mood, '#6abc7e', '#4a9c5e', '#9aac5e', '#8b7c6b');
+  const sheen = moodColor(mood, '#8ad4a0', '#6abc7e', '#bacc7e', '#9a8c7b');
+  const floatY = mood==='ghost' ? Math.sin(t/500)*2*px : 0;
+  if (mood==='ghost') ctx.globalAlpha = 0.6+Math.sin(t/400)*0.15;
+  const by = baseY + floatY - breathe;
+
+  // === SLIME TRAIL ===
+  if (mood !== 'ghost') {
+    ctx.fillStyle = mood==='dying' ? '#5a5a4a22' : '#6abc7e22';
+    // Trail behind (left of body)
+    ctx.fillRect(baseX-6*px, by+10*px, 8*px, px);
+    ctx.fillRect(baseX-5*px, by+11*px, 6*px, px);
+    // Slime drips/blobs
+    const slimeShimmer = Math.sin(t/600) > 0.3;
+    if (slimeShimmer) {
+      ctx.fillStyle = mood==='dying' ? '#7a7a6a33' : '#8ad4a033';
+      ctx.fillRect(baseX-4*px, by+10*px, px, px);
+      ctx.fillRect(baseX-px, by+11*px, px, px);
+    }
+  }
+
+  // === TAIL (long, tapered, curving upward) ===
+  ctx.fillStyle = bdc;
+  ctx.fillRect(baseX-3*px, by+9*px, px, px);      // tail tip
+  ctx.fillRect(baseX-2*px, by+8*px, px, 2*px);     // thin tail
+  ctx.fillRect(baseX-px, by+8*px, 2*px, 2*px);     // tail widens
+  ctx.fillStyle = bc;
+  ctx.fillRect(baseX, by+7*px, 2*px, 3*px);        // tail meets body
+
+  // === BODY (rounder, hump-backed slug shape) ===
+  ctx.fillStyle = bc;
+  // Base/foot (flat underside for slug-like crawling)
+  ctx.fillRect(baseX+px, by+10*px, 10*px, px);
+  ctx.fillRect(baseX, by+9*px, 12*px, px);
+  // Lower body (wide)
+  ctx.fillRect(baseX, by+7*px, 13*px, 2*px);
+  // Mid body (widest — the hump)
+  ctx.fillRect(baseX+px, by+4*px, 12*px, 3*px);
+  // Upper body (tapering up into head)
+  ctx.fillRect(baseX+3*px, by+3*px, 9*px, px);
+  ctx.fillRect(baseX+5*px, by+2*px, 7*px, px);
+
+  // === BELLY / FOOT (lighter underside — slug trademark) ===
+  ctx.fillStyle = blc;
+  ctx.fillRect(baseX+2*px, by+8*px, 9*px, px);
+  ctx.fillRect(baseX+px, by+9*px, 10*px, px);
+  ctx.fillRect(baseX+px, by+10*px, 10*px, px);
+  // Foot ripple animation (slug crawling motion)
+  const ripple = Math.floor(t/300) % 3;
+  ctx.fillStyle = sheen;
+  ctx.fillRect(baseX+(2+ripple*3)*px, by+10*px, 2*px, px);
+
+  // === WET SHEEN (mucus highlight on body) ===
+  ctx.fillStyle = sheen;
+  ctx.globalAlpha = ctx.globalAlpha * 0.4;
+  ctx.fillRect(baseX+4*px, by+4*px, 5*px, px);
+  ctx.fillRect(baseX+3*px, by+5*px, 3*px, px);
+  ctx.globalAlpha = mood==='ghost' ? 0.6+Math.sin(t/400)*0.15 : 1;
+
+  // Dark underline
+  ctx.fillStyle = bdc;
+  ctx.fillRect(baseX+px, by+10*px, 10*px, px);
+
+  // === EYE STALKS (tall, bulbous tips — slug's #1 feature) ===
+  ctx.fillStyle = bc;
+  // Left stalk (tall, slightly leaning)
+  ctx.fillRect(baseX+8*px, by-3*px, px, 5*px);
+  // Right stalk
+  ctx.fillRect(baseX+11*px, by-3*px, px, 5*px);
+  // Bulbous tips (round ends)
+  ctx.fillRect(baseX+7*px, by-4*px, px, 2*px);
+  ctx.fillRect(baseX+8*px, by-5*px, px, px);
+  ctx.fillRect(baseX+10*px, by-4*px, px, 2*px);
+  ctx.fillRect(baseX+11*px, by-5*px, px, px);
+
+  // === LOWER FEELERS (second pair of tentacles) ===
+  ctx.fillStyle = bdc;
+  const feelerWave = Math.sin(t/500)*px*0.5;
+  ctx.fillRect(baseX+9*px, by+3*px, px, 2*px);
+  ctx.fillRect(baseX+9*px+feelerWave, by+5*px, px, px);
+  ctx.fillRect(baseX+12*px, by+3*px, px, 2*px);
+  ctx.fillRect(baseX+12*px-feelerWave, by+5*px, px, px);
+
+  // === EYES (on stalk tips) ===
+  const blink = Math.sin(t/2000) > 0.92;
+  if (mood === 'dying') {
+    ctx.fillStyle = P.eye;
+    ctx.fillRect(baseX+7*px, by-4*px, px, px);
+    ctx.fillRect(baseX+9*px, by-4*px, px, px);
+    ctx.fillRect(baseX+10*px, by-4*px, px, px);
+    ctx.fillRect(baseX+12*px, by-4*px, px, px);
+  } else if (blink && mood !== 'ghost') {
+    ctx.fillStyle = P.eye;
+    ctx.fillRect(baseX+8*px, by-4*px, px, px);
+    ctx.fillRect(baseX+11*px, by-4*px, px, px);
+  } else {
+    // Eye whites on bulbs
+    ctx.fillStyle = P.eyeW;
+    ctx.fillRect(baseX+8*px, by-5*px, px, 2*px);
+    ctx.fillRect(baseX+11*px, by-5*px, px, 2*px);
+    // Pupils
+    ctx.fillStyle = mood==='amazed' ? P.sparkle : P.eye;
+    const pOff = mood==='existential' ? px : 0;
+    ctx.fillRect(baseX+8*px, by-4*px+pOff, px, px);
+    ctx.fillRect(baseX+11*px, by-4*px+pOff, px, px);
+  }
+
+  // === MOUTH ===
+  if (['happy','amazed','impressed','weekend'].includes(mood)) {
+    ctx.fillStyle='#2a5a3e'; ctx.fillRect(baseX+9*px,by+3*px,3*px,px);
+  } else if (['worried','judgemental'].includes(mood)) {
+    ctx.fillStyle='#2a2a2a'; ctx.fillRect(baseX+10*px,by+3*px,2*px,px);
+  } else if (mood==='existential') {
+    ctx.fillStyle='#2a2a2a'; ctx.fillRect(baseX+10*px,by+3*px,px,2*px);
+  } else if (mood==='hungry') {
+    ctx.fillStyle='#2a2a2a'; ctx.fillRect(baseX+9*px,by+3*px,3*px,px); ctx.fillRect(baseX+10*px,by+4*px,px,px);
+  }
+
+  // === PIRATE HAT (sits between eye stalks) ===
+  ctx.fillStyle=P.hatDk; ctx.fillRect(baseX+4*px,by+px,7*px,px);
+  ctx.fillStyle=P.hat; ctx.fillRect(baseX+5*px,by,5*px,px); ctx.fillRect(baseX+6*px,by-px,3*px,px);
+  ctx.fillStyle=P.hatBand; ctx.fillRect(baseX+5*px,by+px,5*px,px);
+  // Skull emblem
+  ctx.fillStyle=P.eyeW; ctx.fillRect(baseX+7*px,by,px,px);
+
+  // === SATCHEL (on the hump) ===
+  ctx.fillStyle=P.strap; ctx.fillRect(baseX+4*px,by+4*px,px,3*px);
+  ctx.fillStyle=P.strapDk; ctx.fillRect(baseX+px,by+4*px,2*px,3*px);
+  ctx.fillStyle=P.strap; ctx.fillRect(baseX+2*px,by+4*px,px,2*px);
+  ctx.fillStyle=P.buckle; ctx.fillRect(baseX+2*px,by+5*px,px,px);
+
+  // === CUTLASS ===
+  if (mood==='amazed'||mood==='impressed') {
+    const sb = Math.sin(t/300)*px*0.5;
+    ctx.fillStyle=P.metalLt;
+    ctx.fillRect(baseX+13*px,by+2*px+sb,px,px);
+    ctx.fillRect(baseX+14*px,by+px+sb,px,px);
+    ctx.fillRect(baseX+15*px,by+sb,px,px);
+    ctx.fillStyle=P.hat; ctx.fillRect(baseX+13*px,by+3*px+sb,px,2*px);
+    ctx.fillStyle=P.buckle; ctx.fillRect(baseX+12*px,by+3*px+sb,3*px,px);
+  }
+  ctx.globalAlpha=1;
+  drawMoodParticles(ctx, px, baseX, by, mood);
+  ctx.restore();
+}
+
+// =============================================
+// CRAB
+// =============================================
+function drawCrab(ctx, px, baseX, baseY, mood) {
+  const t = Date.now();
+  const breathe = Math.sin(t/700)*px*0.4;
+  const wobble = mood==='worried' ? Math.sin(t/250)*px*0.4 : 0;
+  ctx.save(); ctx.translate(wobble, 0);
+  const bc = moodColor(mood, '#c45c3e', '#a04030', '#9a6c3e', '#7a5a4a');
+  const bdc = moodColor(mood, '#a04030', '#8a3028', '#7a5c2e', '#5a4a3a');
+  const blc = moodColor(mood, '#e07a5a', '#c45c3e', '#ba8c5e', '#9a7a6a');
+  const floatY = mood==='ghost' ? Math.sin(t/500)*2*px : 0;
+  if (mood==='ghost') ctx.globalAlpha=0.6+Math.sin(t/400)*0.15;
+  const by = baseY + floatY - breathe;
+
+  // Shell (on top/back) — hides inside when dying/hungry
+  const hideInShell = mood==='dying'||mood==='hungry';
+  ctx.fillStyle = '#a08060';
+  ctx.fillRect(baseX+px, by+px, 10*px, 6*px);
+  ctx.fillRect(baseX+2*px, by, 8*px, px);
+  ctx.fillRect(baseX+2*px, by+7*px, 8*px, px);
+  // Shell spiral
+  ctx.fillStyle = '#8a6a4a';
+  ctx.fillRect(baseX+4*px, by+2*px, 4*px, px);
+  ctx.fillRect(baseX+3*px, by+3*px, px, 2*px);
+  ctx.fillRect(baseX+7*px, by+3*px, px, 2*px);
+  ctx.fillRect(baseX+4*px, by+5*px, 4*px, px);
+  ctx.fillStyle = '#705838';
+  ctx.fillRect(baseX+5*px, by+3*px, 2*px, 2*px);
+  // Shell highlight
+  ctx.fillStyle = '#b89a7a';
+  ctx.fillRect(baseX+3*px, by+px, 2*px, px);
+
+  if (!hideInShell) {
+    // Legs (little nubs underneath)
+    ctx.fillStyle = bdc;
+    ctx.fillRect(baseX, by+8*px, 2*px, px);
+    ctx.fillRect(baseX+3*px, by+8*px, px, px);
+    ctx.fillRect(baseX+8*px, by+8*px, px, px);
+    ctx.fillRect(baseX+10*px, by+8*px, 2*px, px);
+
+    // Body peeks from under shell
+    ctx.fillStyle = bc;
+    ctx.fillRect(baseX, by+6*px, 12*px, 2*px);
+
+    // Claws
+    const clawSnap = Math.sin(t/400) > 0.5 && mood==='amazed';
+    // Left claw
+    ctx.fillStyle = bc;
+    ctx.fillRect(baseX-2*px, by+3*px, 2*px, 2*px);
+    ctx.fillStyle = bdc;
+    ctx.fillRect(baseX-3*px, by+3*px, px, px);
+    if (!clawSnap) ctx.fillRect(baseX-3*px, by+4*px, px, px);
+    // Right claw
+    ctx.fillStyle = bc;
+    ctx.fillRect(baseX+12*px, by+3*px, 2*px, 2*px);
+    ctx.fillStyle = bdc;
+    ctx.fillRect(baseX+14*px, by+3*px, px, px);
+    if (!clawSnap) ctx.fillRect(baseX+14*px, by+4*px, px, px);
+
+    // Eye stalks
+    ctx.fillStyle = bc;
+    ctx.fillRect(baseX+3*px, by-2*px, px, 2*px);
+    ctx.fillRect(baseX+8*px, by-2*px, px, 2*px);
+    // Eyes
+    drawEyes(ctx, px, baseX+3*px, by-2*px, baseX+8*px, by-2*px, mood);
+
+    // Mouth
+    ctx.fillStyle = '#5a2a2a';
+    if (['happy','amazed','impressed','weekend'].includes(mood)) {
+      ctx.fillRect(baseX+5*px, by+7*px, 2*px, px);
+    }
+
+    // Tiny pirate bandana
+    ctx.fillStyle = '#cc3333';
+    ctx.fillRect(baseX+2*px, by, 3*px, px);
+    ctx.fillRect(baseX+px, by-px, px, px);
+  } else {
+    // Just shell, tiny peeping eyes
+    ctx.fillStyle = bc;
+    ctx.fillRect(baseX+3*px, by, px, px);
+    ctx.fillRect(baseX+8*px, by, px, px);
+    ctx.fillStyle = P.eyeW;
+    ctx.fillRect(baseX+3*px, by-px, px, px);
+    ctx.fillRect(baseX+8*px, by-px, px, px);
+    ctx.fillStyle = P.eye;
+    ctx.fillRect(baseX+3*px, by-px, px, px);
+    ctx.fillRect(baseX+8*px, by-px, px, px);
+  }
+
+  ctx.globalAlpha=1;
+  drawMoodParticles(ctx, px, baseX, by, mood);
+  ctx.restore();
+}
+
+// =============================================
+// OCTOPUS
+// =============================================
+function drawOctopus(ctx, px, baseX, baseY, mood) {
+  const t = Date.now();
+  const breathe = Math.sin(t/600)*px*0.5;
+  const wobble = mood==='worried' ? Math.sin(t/180)*px*0.5 : 0;
+  ctx.save(); ctx.translate(wobble, 0);
+
+  // Color: turns red when angry moods
+  const isAngry = ['judgemental','hungry'].includes(mood);
+  const bc = mood==='ghost' ? P.ghost :
+             mood==='dying' ? '#6a5a7a' :
+             isAngry ? '#cc4455' :
+             '#7a5aaa';
+  const bdc = mood==='ghost' ? P.ghostLt :
+              mood==='dying' ? '#5a4a6a' :
+              isAngry ? '#aa3344' :
+              '#5a3a8a';
+  const blc = mood==='ghost' ? '#9999bb' :
+              mood==='dying' ? '#8a7a9a' :
+              isAngry ? '#ee6677' :
+              '#9a7acc';
+  const floatY = mood==='ghost' ? Math.sin(t/500)*2*px : 0;
+  if (mood==='ghost') ctx.globalAlpha=0.6+Math.sin(t/400)*0.15;
+  const by = baseY + floatY - breathe;
+
+  // Tentacles (8 of them, wiggling)
+  ctx.fillStyle = bdc;
+  for (let i = 0; i < 4; i++) {
+    const tw = Math.sin(t/300 + i*1.5)*px;
+    // Left tentacles
+    ctx.fillRect(baseX + i*2*px + tw, by+8*px, px, 2*px);
+    ctx.fillRect(baseX + i*2*px + tw + (i%2?px:-px), by+10*px, px, px);
+    // Right tentacles
+    ctx.fillRect(baseX + (8+i)*px - tw, by+8*px, px, 2*px);
+    ctx.fillRect(baseX + (8+i)*px - tw + (i%2?-px:px), by+10*px, px, px);
+  }
+
+  // Head (dome shape)
+  ctx.fillStyle = bc;
+  ctx.fillRect(baseX+px, by+5*px, 10*px, 3*px);
+  ctx.fillRect(baseX+2*px, by+3*px, 8*px, 2*px);
+  ctx.fillRect(baseX+3*px, by+2*px, 6*px, px);
+  ctx.fillRect(baseX+4*px, by+px, 4*px, px);
+  // Dome top
+  ctx.fillRect(baseX+5*px, by, 2*px, px);
+
+  // Belly
+  ctx.fillStyle = blc;
+  ctx.fillRect(baseX+3*px, by+6*px, 6*px, px);
+  ctx.fillRect(baseX+2*px, by+7*px, 8*px, px);
+
+  // Spots/suckers
+  ctx.fillStyle = bdc;
+  ctx.fillRect(baseX+3*px, by+3*px, px, px);
+  ctx.fillRect(baseX+8*px, by+4*px, px, px);
+
+  // Eyes (big round octopus eyes)
+  drawEyes(ctx, px, baseX+3*px, by+4*px, baseX+8*px, by+4*px, mood);
+
+  // Mouth
+  if (['happy','amazed','impressed','weekend'].includes(mood)) {
+    ctx.fillStyle='#4a2a6a'; ctx.fillRect(baseX+5*px,by+6*px,2*px,px);
+  } else if (mood==='hungry') {
+    ctx.fillStyle='#2a2a2a'; ctx.fillRect(baseX+5*px,by+6*px,2*px,px); ctx.fillRect(baseX+5*px,by+7*px,2*px,px);
+  }
+
+  // Bandana
+  ctx.fillStyle = '#cc3333';
+  ctx.fillRect(baseX+3*px, by+2*px, 6*px, px);
+  ctx.fillStyle = '#aa2222';
+  ctx.fillRect(baseX+8*px, by+2*px, 2*px, px);
+  ctx.fillRect(baseX+9*px, by+3*px, px, px); // bandana tail
+
+  // Ink splat (when judgemental)
+  if (mood==='judgemental') {
+    ctx.fillStyle='#2a1a3a';
+    ctx.fillRect(baseX+12*px, by+7*px, 2*px, px);
+    ctx.fillRect(baseX+13*px, by+8*px, 2*px, px);
+    ctx.fillRect(baseX+11*px, by+8*px, px, px);
+  }
+
+  ctx.globalAlpha=1;
+  drawMoodParticles(ctx, px, baseX, by, mood);
+  ctx.restore();
+}
+
+// =============================================
+// PUFFERFISH
+// =============================================
+function drawPufferfish(ctx, px, baseX, baseY, mood) {
+  const t = Date.now();
+  const breathe = Math.sin(t/500)*px*0.3;
+  const wobble = mood==='worried' ? Math.sin(t/200)*px*0.5 : 0;
+  ctx.save(); ctx.translate(wobble, 0);
+
+  const bc = mood==='ghost' ? P.ghost :
+             mood==='dying' ? '#7a8a5a' :
+             '#d4a840';
+  const bdc = mood==='ghost' ? P.ghostLt :
+              mood==='dying' ? '#5a6a4a' :
+              '#b48830';
+  const blc = mood==='ghost' ? '#9999bb' :
+              mood==='dying' ? '#9aaa7a' :
+              '#f4c860';
+  const floatY = mood==='ghost' ? Math.sin(t/500)*2*px : 0;
+  if (mood==='ghost') ctx.globalAlpha=0.6+Math.sin(t/400)*0.15;
+  const by = baseY + floatY - breathe;
+
+  // Puff level: inflates with bad moods
+  const puff = ['amazed','happy','impressed','weekend'].includes(mood) ? 0 :
+               ['worried'].includes(mood) ? 1 :
+               ['judgemental','existential'].includes(mood) ? 2 : 3;
+
+  const w = 8 + puff*2;
+  const h = 7 + puff;
+  const ox = baseX - puff*px; // offset to stay centered
+
+  // Tail fin
+  ctx.fillStyle = bdc;
+  ctx.fillRect(ox - 2*px, by+3*px, 2*px, 2*px);
+  ctx.fillRect(ox - 3*px, by+2*px, px, px);
+  ctx.fillRect(ox - 3*px, by+5*px, px, px);
+
+  // Body
+  ctx.fillStyle = bc;
+  ctx.fillRect(ox+2*px, by, (w-4)*px, px);
+  ctx.fillRect(ox+px, by+px, (w-2)*px, px);
+  ctx.fillRect(ox, by+2*px, w*px, (h-4)*px);
+  ctx.fillRect(ox+px, by+(h-2)*px, (w-2)*px, px);
+  ctx.fillRect(ox+2*px, by+(h-1)*px, (w-4)*px, px);
+
+  // Belly
+  ctx.fillStyle = blc;
+  ctx.fillRect(ox+2*px, by+(h-3)*px, (w-4)*px, px);
+  ctx.fillRect(ox+3*px, by+(h-4)*px, (w-6)*px, px);
+
+  // Spikes (when puffed)
+  if (puff >= 2) {
+    ctx.fillStyle = bdc;
+    // Top
+    ctx.fillRect(ox+3*px, by-px, px, px);
+    ctx.fillRect(ox+(w-4)*px, by-px, px, px);
+    // Bottom
+    ctx.fillRect(ox+3*px, by+h*px, px, px);
+    ctx.fillRect(ox+(w-4)*px, by+h*px, px, px);
+    // Sides
+    ctx.fillRect(ox-px, by+3*px, px, px);
+    ctx.fillRect(ox+w*px, by+3*px, px, px);
+  }
+  if (puff >= 3) {
+    ctx.fillRect(ox+5*px, by-px, px, px);
+    ctx.fillRect(ox-px, by+5*px, px, px);
+    ctx.fillRect(ox+w*px, by+5*px, px, px);
+    ctx.fillRect(ox+5*px, by+h*px, px, px);
+  }
+
+  // Top fin
+  ctx.fillStyle = bdc;
+  ctx.fillRect(ox+Math.floor(w/2)*px, by-px, 2*px, px);
+  ctx.fillRect(ox+Math.floor(w/2)*px, by-2*px, px, px);
+
+  // Dorsal fin (top)
+  ctx.fillStyle = '#e0b850';
+  ctx.fillRect(ox+(w-3)*px, by+px, px, px);
+
+  // Eyes
+  const eyeY = by + 2*px;
+  const eye1X = ox + Math.floor(w/2)*px;
+  const eye2X = ox + (Math.floor(w/2)+2)*px;
+  drawEyes(ctx, px, eye1X, eyeY, eye2X, eyeY, mood);
+
+  // Mouth
+  const mouthY = by + 4*px;
+  const mouthX = ox + Math.floor(w/2)*px;
+  if (['happy','amazed','impressed','weekend'].includes(mood)) {
+    ctx.fillStyle='#8a7020'; ctx.fillRect(mouthX, mouthY, 2*px, px);
+  } else if (puff >= 2) {
+    // Surprised O mouth
+    ctx.fillStyle='#2a2a2a'; ctx.fillRect(mouthX+px, mouthY, px, px);
+  }
+
+  // Pirate eyepatch
+  ctx.fillStyle = P.eye;
+  ctx.fillRect(eye1X, eyeY, px, 2*px);
+  ctx.fillStyle = '#333';
+  ctx.fillRect(eye1X-px, eyeY, px, px); // strap
+
+  ctx.globalAlpha=1;
+  drawMoodParticles(ctx, px, ox, by, mood);
+  ctx.restore();
+}
+
+// =============================================
+// PARROT
+// =============================================
+function drawParrot(ctx, px, baseX, baseY, mood) {
+  const t = Date.now();
+  const breathe = Math.sin(t/700)*px*0.4;
+  const wobble = mood==='worried' ? Math.sin(t/220)*px*0.4 : 0;
+  ctx.save(); ctx.translate(wobble, 0);
+
+  const bc = mood==='ghost' ? P.ghost :
+             mood==='dying' ? '#5a7a5a' :
+             mood==='hungry' ? '#6a8a3a' :
+             '#2a9a4a';
+  const bdc = mood==='ghost' ? P.ghostLt :
+              mood==='dying' ? '#4a6a4a' :
+              '#1a7a3a';
+  const wingC = mood==='ghost' ? '#7777aa' :
+                mood==='dying' ? '#7a6a3a' :
+                '#cc3333';
+  const chestC = mood==='ghost' ? '#9999bb' :
+                 mood==='dying' ? '#8a8a5a' :
+                 '#e0c030';
+
+  const floatY = mood==='ghost' ? Math.sin(t/500)*2*px : 0;
+  if (mood==='ghost') ctx.globalAlpha=0.6+Math.sin(t/400)*0.15;
+  const by = baseY + floatY - breathe;
+
+  // Perch
+  ctx.fillStyle = '#7a5c3a';
+  ctx.fillRect(baseX-2*px, by+10*px, 16*px, px);
+  ctx.fillRect(baseX-3*px, by+10*px, px, 2*px);
+  ctx.fillRect(baseX+13*px, by+10*px, px, 2*px);
+  ctx.fillStyle = '#5a3c1a';
+  ctx.fillRect(baseX-2*px, by+11*px, 16*px, px);
+
+  // Tail feathers
+  ctx.fillStyle = wingC;
+  ctx.fillRect(baseX, by+8*px, px, 2*px);
+  ctx.fillRect(baseX-px, by+9*px, px, 2*px);
+  // Lost feathers when dying/hungry
+  if (mood==='dying'||mood==='hungry') {
+    ctx.fillStyle = bdc;
+    ctx.fillRect(baseX, by+8*px, px, px); // missing feather
+  } else {
+    ctx.fillRect(baseX+px, by+9*px, px, px);
+  }
+
+  // Body
+  ctx.fillStyle = bc;
+  ctx.fillRect(baseX+2*px, by+5*px, 8*px, 5*px);
+  ctx.fillRect(baseX+3*px, by+4*px, 6*px, px);
+
+  // Chest
+  ctx.fillStyle = chestC;
+  ctx.fillRect(baseX+5*px, by+6*px, 4*px, 3*px);
+
+  // Wing
+  ctx.fillStyle = wingC;
+  ctx.fillRect(baseX+2*px, by+5*px, 2*px, 4*px);
+  // Wing flap when amazed
+  if (mood==='amazed') {
+    const flap = Math.sin(t/150) > 0;
+    if (flap) {
+      ctx.fillRect(baseX+px, by+4*px, px, 2*px);
+      ctx.fillRect(baseX, by+3*px, px, 2*px);
+    }
+  }
+
+  // Head
+  ctx.fillStyle = bc;
+  ctx.fillRect(baseX+4*px, by+px, 5*px, 3*px);
+  ctx.fillRect(baseX+5*px, by, 3*px, px);
+
+  // Head feather crest
+  if (mood!=='dying'&&mood!=='hungry') {
+    ctx.fillStyle = wingC;
+    ctx.fillRect(baseX+5*px, by-px, px, px);
+    ctx.fillRect(baseX+6*px, by-2*px, px, px);
+    ctx.fillRect(baseX+7*px, by-px, px, px);
+  }
+
+  // Eyes
+  drawEyes(ctx, px, baseX+6*px, by+px, baseX+8*px, by+px, mood);
+
+  // Beak
+  ctx.fillStyle = '#e0a020';
+  ctx.fillRect(baseX+9*px, by+2*px, 2*px, px);
+  ctx.fillRect(baseX+9*px, by+3*px, px, px);
+  // Open beak when hungry or talking
+  if (mood==='hungry'||mood==='amazed') {
+    ctx.fillStyle = '#c08010';
+    ctx.fillRect(baseX+9*px, by+3*px, 2*px, px);
+  }
+
+  // Feet on perch
+  ctx.fillStyle = '#c08010';
+  ctx.fillRect(baseX+4*px, by+10*px, px, px);
+  ctx.fillRect(baseX+5*px, by+10*px, px, px);
+  ctx.fillRect(baseX+7*px, by+10*px, px, px);
+  ctx.fillRect(baseX+8*px, by+10*px, px, px);
+
+  // Tiny pirate hat
+  ctx.fillStyle = P.hatDk;
+  ctx.fillRect(baseX+4*px, by, 4*px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(baseX+5*px, by-px, 2*px, px);
+  ctx.fillStyle = P.hatBand;
+  ctx.fillRect(baseX+5*px, by, 2*px, px);
+
+  ctx.globalAlpha=1;
+
+  // Floating feathers when dying
+  if (mood==='dying'||mood==='hungry') {
+    ctx.fillStyle = wingC;
+    const fy = (t/500)%10;
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(baseX+12*px, by+fy*px, px, px);
+    ctx.fillRect(baseX-px, by+(fy+3)*px, px, px);
+    ctx.globalAlpha = 1;
+  }
+
+  drawMoodParticles(ctx, px, baseX, by, mood);
+  ctx.restore();
+}
+
+// =============================================
+// CREATURE DISPATCHER
+// =============================================
+const DRAW_FNS = { slug: drawSlug, crab: drawCrab, octopus: drawOctopus, pufferfish: drawPufferfish, parrot: drawParrot };
+
+function drawCreature(ctx, type, px, x, y, mood) {
+  DRAW_FNS[type](ctx, px, x, y, mood);
+}
+
+// =============================================
+// EGG
+// =============================================
+function drawEgg(ctx, px, baseX, baseY, crackStage, wobbleAmt) {
+  const t = Date.now();
+  const wobble = Math.sin(t/(300-crackStage*50))*wobbleAmt*px;
+  ctx.save(); ctx.translate(wobble, 0);
+  ctx.fillStyle=P.egg;
+  ctx.fillRect(baseX+3*px,baseY,4*px,px);
+  ctx.fillRect(baseX+2*px,baseY+px,6*px,px);
+  ctx.fillRect(baseX+px,baseY+2*px,8*px,2*px);
+  ctx.fillRect(baseX,baseY+4*px,10*px,4*px);
+  ctx.fillRect(baseX+px,baseY+8*px,8*px,2*px);
+  ctx.fillRect(baseX+2*px,baseY+10*px,6*px,px);
+  ctx.fillRect(baseX+3*px,baseY+11*px,4*px,px);
+  ctx.fillStyle=P.eggLt;
+  ctx.fillRect(baseX+3*px,baseY+2*px,2*px,px);
+  ctx.fillRect(baseX+2*px,baseY+3*px,px,2*px);
+  ctx.fillStyle=P.eggSpot;
+  ctx.fillRect(baseX+5*px,baseY+3*px,px,px);
+  ctx.fillRect(baseX+2*px,baseY+6*px,px,px);
+  ctx.fillRect(baseX+7*px,baseY+5*px,px,px);
+  ctx.fillRect(baseX+4*px,baseY+8*px,px,px);
+  if (crackStage>=1) { ctx.fillStyle=P.crack; ctx.fillRect(baseX+5*px,baseY+4*px,px,px); ctx.fillRect(baseX+6*px,baseY+5*px,px,px); ctx.fillRect(baseX+5*px,baseY+6*px,px,px); }
+  if (crackStage>=2) { ctx.fillRect(baseX+3*px,baseY+5*px,px,px); ctx.fillRect(baseX+2*px,baseY+6*px,px,px); ctx.fillRect(baseX+7*px,baseY+6*px,px,px); }
+  if (crackStage>=3) { ctx.fillRect(baseX+4*px,baseY+3*px,px,px); ctx.fillRect(baseX+px,baseY+5*px,px,px); ctx.fillRect(baseX+8*px,baseY+7*px,px,px); ctx.fillStyle='#4a9c5e44'; ctx.fillRect(baseX+4*px,baseY+5*px,2*px,2*px); }
+  ctx.restore();
+}
+
+// =============================================
+// BACKGROUND
+// =============================================
+function drawBackground(ctx, w, h, mood) {
+  const gradient = ctx.createLinearGradient(0,0,0,h);
+  if (['ghost','dying'].includes(mood)) { gradient.addColorStop(0,'#0d0d1a'); gradient.addColorStop(1,'#1a1a2e'); }
+  else if (['hungry','existential','judgemental'].includes(mood)) { gradient.addColorStop(0,'#1a2030'); gradient.addColorStop(1,'#2a2a35'); }
+  else if (mood==='worried') { gradient.addColorStop(0,'#1a2a20'); gradient.addColorStop(1,'#2a3a30'); }
+  else { gradient.addColorStop(0,P.sky); gradient.addColorStop(1,P.skyLt); }
+  ctx.fillStyle=gradient; ctx.fillRect(0,0,w,h);
+  const groundY=Math.floor(h*0.75); const px=3; const t=Date.now();
+  if (['ghost','dying','existential','hungry'].includes(mood)) {
+    ctx.fillStyle='#ffffff';
+    for (const [sx,sy] of [[20,10],[60,25],[140,15],[180,30],[250,8],[320,20],[100,5],[280,18]]) {
+      if(sx<w){ctx.globalAlpha=0.3+Math.sin(t/1000+sx)*0.2; ctx.fillRect(sx,sy,px,px);}
+    } ctx.globalAlpha=1;
+  }
+  if (['happy','amazed','impressed','weekend'].includes(mood)) {
+    ctx.fillStyle='#1a5c3a';
+    const cx=((t/40)%(w+80))-40; ctx.fillRect(cx,20,30,px*2); ctx.fillRect(cx+5,14,20,px*2);
+    const cx2=((t/60+200)%(w+80))-40; ctx.fillRect(cx2,35,24,px*2); ctx.fillRect(cx2+4,29,16,px*2);
+  }
+  if (['worried','judgemental'].includes(mood)) {
+    ctx.fillStyle='#4488aa33';
+    for (let i=0;i<12;i++){const rx=(i*37+Math.floor(t/100)*3)%w;const ry=(i*23+Math.floor(t/80)*4)%groundY;ctx.fillRect(rx,ry,px,px*2);}
+  }
+  ctx.fillStyle=['ghost','dying'].includes(mood)?'#0d1117':mood==='hungry'?'#3d2b1f':['existential','judgemental'].includes(mood)?'#2a3a2a':mood==='worried'?'#2a5a3a':P.ground;
+  ctx.fillRect(0,groundY,w,h-groundY);
+  ctx.fillStyle=['ghost','dying'].includes(mood)?'#1a1a1a':mood==='hungry'?'#4a3b2f':P.groundDk;
+  ctx.fillRect(0,groundY,w,px);
+  if (['happy','amazed','impressed','weekend'].includes(mood)) {
+    ctx.fillStyle='#5aac6e';
+    for (const tx of [10,45,80,130,170,220,280,340]) { if(tx<w){ctx.fillRect(tx,groundY-px,px,px);ctx.fillRect(tx+px,groundY-px*2,px,px);ctx.fillRect(tx+px*2,groundY-px,px,px);} }
+  }
+  if (['hungry','dying','ghost'].includes(mood)) {
+    ctx.fillStyle='#4a3a2a';
+    for (const sx of [30,120,250,350]) { if(sx<w){ctx.fillRect(sx,groundY-px*2,px,px*2);ctx.fillRect(sx+px,groundY-px,px,px);} }
+  }
+  if (mood==='ghost') {
+    ctx.fillStyle='#333344';
+    for (const tx of [40,150,300]) { if(tx<w){ctx.fillRect(tx,groundY-px*4,px*3,px*4);ctx.fillRect(tx+px,groundY-px*5,px,px);} }
+  }
+}
+
+// =============================================
+// RENDER
+// =============================================
+
+// --- Comparison matrix ---
+const cGrid = document.getElementById('compare-grid');
+// Header row
+const emptyH = document.createElement('div'); emptyH.className='compare-header'; emptyH.textContent=''; cGrid.appendChild(emptyH);
+for (const c of CREATURES) { const h=document.createElement('div'); h.className='compare-header'; h.textContent=CREATURE_INFO[c].icon+' '+CREATURE_INFO[c].name; cGrid.appendChild(h); }
+const compareCanvases = [];
+for (const mood of MOODS) {
+  const lbl = document.createElement('div'); lbl.className='compare-label'; lbl.textContent=mood; cGrid.appendChild(lbl);
+  for (const creature of CREATURES) {
+    const cell = document.createElement('div'); cell.className='compare-cell';
+    const cvs = document.createElement('canvas'); cvs.width=100; cvs.height=80;
+    cvs.style.width='100px'; cvs.style.height='80px';
+    cell.appendChild(cvs); cGrid.appendChild(cell);
+    compareCanvases.push({canvas:cvs, creature, mood});
+  }
+}
+
+// --- Creature details ---
+const detailsDiv = document.getElementById('creature-details');
+const detailCanvases = [];
+for (const c of CREATURES) {
+  const row = document.createElement('div'); row.className='creature-row';
+  const hdr = document.createElement('div'); hdr.className='creature-header';
+  hdr.innerHTML=`<span class="creature-icon">${CREATURE_INFO[c].icon}</span><span class="creature-name">${CREATURE_INFO[c].name}</span><span class="creature-desc">${CREATURE_INFO[c].desc}</span>`;
+  row.appendChild(hdr);
+  const grid = document.createElement('div'); grid.className='grid';
+  for (const mood of ['happy','worried','dying','ghost']) {
+    const card = document.createElement('div'); card.className='card';
+    const cvs = document.createElement('canvas'); cvs.width=140; cvs.height=120; cvs.style.width='140px'; cvs.style.height='120px';
+    card.appendChild(cvs);
+    const lbl = document.createElement('div'); lbl.className='card-label'; lbl.textContent=mood;
+    card.appendChild(lbl);
+    grid.appendChild(card);
+    detailCanvases.push({canvas:cvs, creature:c, mood});
+  }
+  row.appendChild(grid);
+  detailsDiv.appendChild(row);
+}
+
+// --- Egg gallery ---
+const eggGallery = document.getElementById('egg-gallery');
+const eggCanvases = [];
+for (let s=0;s<=3;s++) {
+  const card=document.createElement('div'); card.className='card';
+  const cvs=document.createElement('canvas'); cvs.width=100; cvs.height=100; cvs.style.width='100px'; cvs.style.height='100px';
+  card.appendChild(cvs);
+  const lbl=document.createElement('div'); lbl.className='card-label'; lbl.textContent=s===0?'Fresh':`Crack ${s}`;
+  card.appendChild(lbl);
+  eggGallery.appendChild(card);
+  eggCanvases.push({canvas:cvs, stage:s});
+}
+
+// --- Background gallery ---
+const bgGallery = document.getElementById('bg-gallery');
+const bgCanvases = [];
+for (const mood of ['happy','worried','hungry','ghost']) {
+  const card=document.createElement('div'); card.className='card';
+  const cvs=document.createElement('canvas'); cvs.width=200; cvs.height=120; cvs.style.width='200px'; cvs.style.height='120px';
+  card.appendChild(cvs);
+  const lbl=document.createElement('div'); lbl.className='card-label'; lbl.textContent=mood;
+  card.appendChild(lbl);
+  bgGallery.appendChild(card);
+  bgCanvases.push({canvas:cvs, mood});
+}
+
+// --- Animation previews ---
+const animCreature = document.getElementById('anim-creature');
+const animMood = document.getElementById('anim-mood');
+const animSolo = document.getElementById('anim-solo');
+const animHabitat = document.getElementById('anim-habitat');
+
+function render() {
+  requestAnimationFrame(render);
+
+  // Comparison matrix
+  for (const {canvas,creature,mood} of compareCanvases) {
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=false;
+    ctx.clearRect(0,0,100,80);
+    ctx.fillStyle=mood==='ghost'?'#0d0d1a':'#0f1f15';
+    ctx.fillRect(0,0,100,80);
+    ctx.fillStyle=mood==='ghost'?'#0d1117':'#2d6a4f';
+    ctx.fillRect(0,60,100,20);
+    drawCreature(ctx, creature, 3, 20, 18, mood);
+  }
+
+  // Detail cards
+  for (const {canvas,creature,mood} of detailCanvases) {
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=false;
+    ctx.clearRect(0,0,140,120);
+    ctx.fillStyle=mood==='ghost'?'#0d0d1a':'#0f1f15';
+    ctx.fillRect(0,0,140,120);
+    ctx.fillStyle=mood==='ghost'?'#0d1117':'#2d6a4f';
+    ctx.fillRect(0,90,140,30);
+    drawCreature(ctx, creature, 5, 25, 35, mood);
+  }
+
+  // Eggs
+  for (const {canvas,stage} of eggCanvases) {
+    const ctx=canvas.getContext('2d'); ctx.imageSmoothingEnabled=false;
+    ctx.clearRect(0,0,100,100);
+    ctx.fillStyle='#0f1f15'; ctx.fillRect(0,0,100,100);
+    ctx.fillStyle='#2d6a4f'; ctx.fillRect(0,75,100,25);
+    drawEgg(ctx, 5, 25, 15, stage, stage+1);
+  }
+
+  // Backgrounds
+  for (const {canvas,mood} of bgCanvases) {
+    const ctx=canvas.getContext('2d'); ctx.imageSmoothingEnabled=false;
+    ctx.clearRect(0,0,200,120);
+    drawBackground(ctx, 200, 120, mood);
+  }
+
+  // Live preview
+  const cType = animCreature.value;
+  const cMood = animMood.value;
+
+  const sctx = animSolo.getContext('2d'); sctx.imageSmoothingEnabled=false;
+  sctx.clearRect(0,0,200,200);
+  sctx.fillStyle='#0f1f15'; sctx.fillRect(0,0,200,200);
+  sctx.fillStyle='#2d6a4f'; sctx.fillRect(0,150,200,50);
+  drawCreature(sctx, cType, 8, 44, 50, cMood);
+
+  const hctx = animHabitat.getContext('2d'); hctx.imageSmoothingEnabled=false;
+  hctx.clearRect(0,0,400,300);
+  drawBackground(hctx, 400, 300, cMood);
+  drawCreature(hctx, cType, 8, 144, 125, cMood);
+}
+
+render();
+</script>
+</body>
+</html>

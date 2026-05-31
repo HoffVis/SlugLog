@@ -1,6 +1,6 @@
 import { SlugMood } from "./SlugMood";
 import type { SlugMoodType } from "./SlugMood";
-import slugLogo from "../assets/slug-logo.png";
+const slugLogo = "/sprites/slug/slug-base.png";
 import "./About.css";
 
 const SLUG_STATES: { mood: SlugMoodType; label: string; trigger: string }[] = [

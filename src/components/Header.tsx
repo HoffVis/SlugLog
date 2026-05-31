@@ -1,5 +1,5 @@
 import { getWeekMonday, formatShortDate } from "../lib/dates";
-import slugLogo from "../assets/slug-logo.png";
+const slugLogo = "/sprites/slug/slug-base.png";
 import "./Header.css";
 
 interface HeaderProps {
@@ -11,8 +11,8 @@ interface HeaderProps {
   onToday: () => void;
   theme: "light" | "dark" | "midnight";
   onToggleTheme: () => void;
-  view: "log" | "board" | "projects" | "all" | "cli" | "about";
-  onViewChange: (view: "log" | "board" | "projects" | "all" | "cli" | "about") => void;
+  view: "log" | "board" | "projects" | "all" | "habitat" | "cli" | "about";
+  onViewChange: (view: "log" | "board" | "projects" | "all" | "habitat" | "cli" | "about") => void;
 }
 
 export function Header({
@@ -68,6 +68,12 @@ export function Header({
             onClick={() => onViewChange("projects")}
           >
             sProjects
+          </button>
+          <button
+            className={`view-tab ${view === "habitat" ? "active" : ""}`}
+            onClick={() => onViewChange("habitat")}
+          >
+            sHabitat
           </button>
           <span className="view-tab-divider" />
           <button

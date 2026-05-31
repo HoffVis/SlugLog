@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SlugLog — Evolution Workshop</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d1117; color: #e6e6e6; font-family: 'Courier New', monospace; padding: 24px; }
+  h1 { font-size: 20px; margin-bottom: 4px; color: #4a9c5e; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 32px; }
+
+  .evo-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(3, 1fr);
+    gap: 3px;
+    background: #21262d;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 900px;
+  }
+  .evo-header {
+    background: #0d1117;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #58a6ff;
+  }
+  .evo-header .stage { font-size: 10px; color: #8b949e; font-weight: normal; display: block; margin-top: 2px; }
+  .evo-label {
+    background: #0d1117;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .evo-label-name { font-size: 14px; font-weight: bold; }
+  .evo-label-desc { font-size: 10px; color: #8b949e; }
+  .evo-cell {
+    background: #161b22;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+  .evo-cell canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Evolution Workshop</h1>
+<div class="subtitle">3 starters × 3 evolution stages — happy pose</div>
+
+<div class="evo-grid" id="grid"></div>
+
+<script>
+const P = {
+  eye: '#1a1a1a', eyeW: '#ffffff',
+  hat: '#5c3a1e', hatDk: '#3d2510', hatBand: '#c4a54a',
+  buckle: '#d4b44a', strap: '#7a5c3a', strapDk: '#5c3a1e',
+  metalLt: '#b0b0b0', metal: '#8a8a8a',
+  sparkle: '#ffd700', gold: '#e8c840', goldDk: '#c4a030',
+};
+
+// =============================================
+// SLUG LINE — Tall upright posture like original art
+// Hat on dome, eye stalk from side, belt around body
+// =============================================
+function drawSlug1(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/800)*px*0.4;
+
+  // Slime puddle
+  ctx.fillStyle = '#6abc7e20';
+  ctx.fillRect(bx+px, by+14*px, 8*px, px);
+  ctx.fillRect(bx+2*px, by+15*px, 6*px, px);
+  const shimmer = Math.sin(t/600)>0.3;
+  if (shimmer) { ctx.fillStyle='#8ad4a033'; ctx.fillRect(bx+4*px, by+14*px, px, px); }
+
+  // Tail base (curves out left at bottom)
+  ctx.fillStyle = '#357a47';
+  ctx.fillRect(bx, by+13*px-breathe, 3*px, px);
+  ctx.fillRect(bx-px, by+12*px-breathe, 2*px, px);
+
+  // Body — TALL upright slug (like original art)
+  ctx.fillStyle = '#4a9c5e';
+  // Base (widest)
+  ctx.fillRect(bx+px, by+13*px-breathe, 8*px, px);
+  ctx.fillRect(bx, by+12*px-breathe, 10*px, px);
+  ctx.fillRect(bx, by+11*px-breathe, 10*px, px);
+  // Mid body
+  ctx.fillRect(bx+px, by+9*px-breathe, 8*px, 2*px);
+  ctx.fillRect(bx+px, by+7*px-breathe, 7*px, 2*px);
+  // Upper body (narrowing)
+  ctx.fillRect(bx+2*px, by+5*px-breathe, 6*px, 2*px);
+  ctx.fillRect(bx+2*px, by+4*px-breathe, 5*px, px);
+  // Head dome
+  ctx.fillRect(bx+3*px, by+3*px-breathe, 4*px, px);
+  ctx.fillRect(bx+3*px, by+2*px-breathe, 3*px, px);
+  ctx.fillRect(bx+4*px, by+px-breathe, 2*px, px);
+
+  // Belly (lighter front)
+  ctx.fillStyle = '#6abc7e';
+  ctx.fillRect(bx+5*px, by+9*px-breathe, 4*px, 2*px);
+  ctx.fillRect(bx+5*px, by+11*px-breathe, 4*px, 2*px);
+  ctx.fillStyle = '#8ad4a0';
+  ctx.fillRect(bx+6*px, by+10*px-breathe, 2*px, px);
+
+  // Slime sheen on body
+  ctx.fillStyle = '#8ad4a044';
+  ctx.fillRect(bx+3*px, by+5*px-breathe, 2*px, px);
+  ctx.fillRect(bx+2*px, by+7*px-breathe, px, 2*px);
+
+  // Eye stalk — comes out the RIGHT side of head
+  ctx.fillStyle = '#4a9c5e';
+  ctx.fillRect(bx+7*px, by+3*px-breathe, 2*px, px);
+  ctx.fillRect(bx+8*px, by+2*px-breathe, px, px);
+  // Eye bulb
+  ctx.fillRect(bx+9*px, by+px-breathe, 2*px, 2*px);
+  // Eye
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+9*px, by+px-breathe, 2*px, 2*px);
+  ctx.fillStyle = P.eye;
+  const blink = Math.sin(t/2000)>0.92;
+  if (!blink) {
+    ctx.fillRect(bx+10*px, by+2*px-breathe, px, px);
+  } else {
+    ctx.fillRect(bx+9*px, by+2*px-breathe, 2*px, px);
+  }
+
+  // Mouth (on the front/right)
+  ctx.fillStyle = '#2a5a3e';
+  ctx.fillRect(bx+7*px, by+5*px-breathe, 2*px, px);
+
+  // Pirate hat ON TOP of dome
+  ctx.fillStyle = P.hatDk;
+  ctx.fillRect(bx+2*px, by+px-breathe, 5*px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx+3*px, by-breathe, 3*px, px);
+  ctx.fillRect(bx+3*px, by-px-breathe, 2*px, px);
+  ctx.fillStyle = P.hatBand;
+  ctx.fillRect(bx+3*px, by+px-breathe, 3*px, px);
+  // Skull
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+4*px, by-breathe, px, px);
+
+  // Belt around body
+  ctx.fillStyle = P.strapDk;
+  ctx.fillRect(bx+px, by+9*px-breathe, 8*px, px);
+  ctx.fillStyle = P.buckle;
+  ctx.fillRect(bx+6*px, by+9*px-breathe, px, px);
+
+  // Cutlass hanging from belt
+  ctx.fillStyle = P.metalLt;
+  ctx.fillRect(bx+9*px, by+10*px-breathe, px, px);
+  ctx.fillRect(bx+9*px, by+11*px-breathe, px, px);
+  ctx.fillRect(bx+10*px, by+12*px-breathe, px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx+9*px, by+9*px-breathe, px, px); // handle
+}
+
+function drawSlug2(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/800)*px*0.4;
+
+  // Bigger slime puddle
+  ctx.fillStyle = '#6abc7e25';
+  ctx.fillRect(bx, by+16*px, 12*px, px);
+  ctx.fillRect(bx+px, by+17*px, 9*px, px);
+  ctx.fillStyle = '#8ad4a038';
+  if (Math.sin(t/500)>0.2) { ctx.fillRect(bx+3*px,by+16*px,px,px); ctx.fillRect(bx+7*px,by+16*px,px,px); }
+
+  // Tail (bigger)
+  ctx.fillStyle = '#357a47';
+  ctx.fillRect(bx-px, by+15*px-breathe, 3*px, px);
+  ctx.fillRect(bx-2*px, by+14*px-breathe, 3*px, px);
+  ctx.fillRect(bx-3*px, by+13*px-breathe, 2*px, px);
+
+  // Body — taller, thicker
+  ctx.fillStyle = '#4a9c5e';
+  // Base
+  ctx.fillRect(bx, by+15*px-breathe, 11*px, px);
+  ctx.fillRect(bx, by+14*px-breathe, 12*px, px);
+  ctx.fillRect(bx-px, by+13*px-breathe, 13*px, px);
+  // Mid
+  ctx.fillRect(bx, by+11*px-breathe, 11*px, 2*px);
+  ctx.fillRect(bx+px, by+9*px-breathe, 9*px, 2*px);
+  ctx.fillRect(bx+px, by+7*px-breathe, 8*px, 2*px);
+  // Upper
+  ctx.fillRect(bx+2*px, by+5*px-breathe, 7*px, 2*px);
+  ctx.fillRect(bx+3*px, by+4*px-breathe, 5*px, px);
+  // Head
+  ctx.fillRect(bx+3*px, by+3*px-breathe, 5*px, px);
+  ctx.fillRect(bx+4*px, by+2*px-breathe, 3*px, px);
+  ctx.fillRect(bx+4*px, by+px-breathe, 2*px, px);
+
+  // Belly
+  ctx.fillStyle = '#6abc7e';
+  ctx.fillRect(bx+6*px, by+10*px-breathe, 4*px, 3*px);
+  ctx.fillRect(bx+7*px, by+13*px-breathe, 3*px, 2*px);
+  ctx.fillStyle = '#8ad4a0';
+  ctx.fillRect(bx+7*px, by+11*px-breathe, 2*px, px);
+
+  // Slime sheen
+  ctx.fillStyle = '#8ad4a050';
+  ctx.fillRect(bx+3*px, by+5*px-breathe, 3*px, px);
+  ctx.fillRect(bx+2*px, by+7*px-breathe, px, 3*px);
+
+  // Eye stalk (thicker, taller)
+  ctx.fillStyle = '#4a9c5e';
+  ctx.fillRect(bx+8*px, by+3*px-breathe, 2*px, px);
+  ctx.fillRect(bx+9*px, by+2*px-breathe, 2*px, px);
+  ctx.fillRect(bx+10*px, by+px-breathe, px, px);
+  // Bulb
+  ctx.fillRect(bx+10*px, by-breathe, 3*px, 2*px);
+  ctx.fillRect(bx+11*px, by-px-breathe, px, px);
+  // Eye
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+10*px, by-breathe, 3*px, 2*px);
+  ctx.fillStyle = P.eye;
+  const blink = Math.sin(t/2200)>0.93;
+  if (!blink) ctx.fillRect(bx+12*px, by+px-breathe, px, px);
+  else ctx.fillRect(bx+10*px, by+px-breathe, 3*px, px);
+
+  // Mouth (grin)
+  ctx.fillStyle = '#2a5a3e';
+  ctx.fillRect(bx+8*px, by+5*px-breathe, 2*px, px);
+  ctx.fillRect(bx+9*px, by+6*px-breathe, px, px);
+
+  // Full tricorn
+  ctx.fillStyle = P.hatDk; ctx.fillRect(bx+2*px, by+px-breathe, 6*px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx+3*px, by-breathe, 4*px, px);
+  ctx.fillRect(bx+3*px, by-px-breathe, 3*px, px);
+  ctx.fillRect(bx+4*px, by-2*px-breathe, 2*px, px);
+  ctx.fillStyle = P.hatBand; ctx.fillRect(bx+3*px, by+px-breathe, 4*px, px);
+  // Skull & bones
+  ctx.fillStyle = P.eyeW; ctx.fillRect(bx+4*px, by-breathe, 2*px, px);
+  ctx.fillRect(bx+5*px, by-px-breathe, px, px);
+
+  // Goggles pushed up
+  ctx.fillStyle = '#6a8caa'; ctx.fillRect(bx+2*px, by+2*px-breathe, 3*px, px);
+  ctx.fillStyle = '#8ab0cc'; ctx.fillRect(bx+3*px, by+2*px-breathe, px, px);
+
+  // Belt with dual buckles
+  ctx.fillStyle = P.strapDk; ctx.fillRect(bx, by+11*px-breathe, 11*px, px);
+  ctx.fillStyle = P.buckle; ctx.fillRect(bx+7*px, by+11*px-breathe, px, px);
+  ctx.fillStyle = P.buckle; ctx.fillRect(bx+4*px, by+11*px-breathe, px, px);
+
+  // Satchel on back
+  ctx.fillStyle = P.strapDk; ctx.fillRect(bx-px, by+7*px-breathe, 2*px, 4*px);
+  ctx.fillStyle = P.strap; ctx.fillRect(bx, by+7*px-breathe, px, 3*px);
+  ctx.fillStyle = P.buckle; ctx.fillRect(bx, by+8*px-breathe, px, px);
+
+  // Cutlass at side
+  const sb = Math.sin(t/400)*px*0.3;
+  ctx.fillStyle = P.metalLt;
+  ctx.fillRect(bx+11*px, by+11*px-breathe+sb, px, px);
+  ctx.fillRect(bx+12*px, by+12*px-breathe+sb, px, px);
+  ctx.fillRect(bx+12*px, by+13*px-breathe+sb, px, px);
+  ctx.fillRect(bx+13*px, by+14*px-breathe+sb, px, px);
+  ctx.fillStyle = P.hat; ctx.fillRect(bx+11*px, by+10*px-breathe+sb, px, px);
+  ctx.fillStyle = P.buckle; ctx.fillRect(bx+10*px, by+11*px-breathe+sb, 3*px, px);
+}
+
+function drawSlug3(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/800)*px*0.5;
+
+  // MASSIVE glowing slime
+  ctx.fillStyle = '#4a9c5e18';
+  ctx.fillRect(bx-2*px, by+19*px, 18*px, 2*px);
+  ctx.fillStyle = '#6abc7e28';
+  ctx.fillRect(bx-px, by+19*px, 14*px, px);
+  // Gold sparkle in slime
+  ctx.fillStyle = P.sparkle;
+  const sg = Math.floor(t/180)%6;
+  ctx.fillRect(bx+(sg*2)*px, by+19*px, px, px);
+
+  // Thick tail
+  ctx.fillStyle = '#357a47';
+  ctx.fillRect(bx-2*px, by+18*px-breathe, 4*px, px);
+  ctx.fillRect(bx-4*px, by+17*px-breathe, 4*px, px);
+  ctx.fillRect(bx-5*px, by+16*px-breathe, 3*px, px);
+  ctx.fillStyle = '#4a9c5e';
+  ctx.fillRect(bx-3*px, by+16*px-breathe, 4*px, 2*px);
+
+  // MASSIVE body
+  ctx.fillStyle = '#4a9c5e';
+  // Base
+  ctx.fillRect(bx, by+18*px-breathe, 14*px, px);
+  ctx.fillRect(bx-px, by+17*px-breathe, 16*px, px);
+  ctx.fillRect(bx-px, by+16*px-breathe, 16*px, px);
+  // Lower
+  ctx.fillRect(bx, by+14*px-breathe, 14*px, 2*px);
+  ctx.fillRect(bx, by+12*px-breathe, 13*px, 2*px);
+  // Mid
+  ctx.fillRect(bx+px, by+10*px-breathe, 11*px, 2*px);
+  ctx.fillRect(bx+px, by+8*px-breathe, 10*px, 2*px);
+  // Upper
+  ctx.fillRect(bx+2*px, by+6*px-breathe, 8*px, 2*px);
+  ctx.fillRect(bx+3*px, by+5*px-breathe, 6*px, px);
+  // Head dome (big)
+  ctx.fillRect(bx+3*px, by+4*px-breathe, 6*px, px);
+  ctx.fillRect(bx+4*px, by+3*px-breathe, 4*px, px);
+  ctx.fillRect(bx+4*px, by+2*px-breathe, 3*px, px);
+  ctx.fillRect(bx+5*px, by+px-breathe, 2*px, px);
+
+  // Belly
+  ctx.fillStyle = '#6abc7e';
+  ctx.fillRect(bx+7*px, by+12*px-breathe, 5*px, 4*px);
+  ctx.fillRect(bx+8*px, by+16*px-breathe, 4*px, 2*px);
+  ctx.fillStyle = '#8ad4a0';
+  ctx.fillRect(bx+8*px, by+13*px-breathe, 3*px, 2*px);
+
+  // Bioluminescent spots
+  ctx.fillStyle = '#aaddff44';
+  const glow = Math.sin(t/400)*0.3+0.5;
+  ctx.globalAlpha = glow;
+  ctx.fillRect(bx+3*px, by+8*px-breathe, px, px);
+  ctx.fillRect(bx+5*px, by+12*px-breathe, px, px);
+  ctx.fillRect(bx+2*px, by+14*px-breathe, px, px);
+  ctx.globalAlpha = 1;
+
+  // Sheen
+  ctx.fillStyle = '#8ad4a055';
+  ctx.fillRect(bx+3*px, by+6*px-breathe, 4*px, px);
+  ctx.fillRect(bx+2*px, by+8*px-breathe, 2*px, 2*px);
+  ctx.fillRect(bx+4*px, by+10*px-breathe, 3*px, px);
+
+  // MAIN eye stalk (thick, majestic)
+  ctx.fillStyle = '#4a9c5e';
+  ctx.fillRect(bx+9*px, by+4*px-breathe, 2*px, px);
+  ctx.fillRect(bx+10*px, by+3*px-breathe, 2*px, px);
+  ctx.fillRect(bx+11*px, by+2*px-breathe, 2*px, px);
+  ctx.fillRect(bx+12*px, by+px-breathe, px, px);
+  // Big bulb
+  ctx.fillRect(bx+12*px, by-px-breathe, 3*px, 3*px);
+  ctx.fillRect(bx+13*px, by-2*px-breathe, px, px);
+  // Eye
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+12*px, by-px-breathe, 3*px, 3*px);
+  ctx.fillStyle = P.eye;
+  const blink = Math.sin(t/2500)>0.93;
+  if (!blink) {
+    ctx.fillRect(bx+14*px, by-breathe, px, px);
+  }
+
+  // Second smaller stalk
+  ctx.fillStyle = '#4a9c5e';
+  ctx.fillRect(bx+8*px, by+3*px-breathe, px, px);
+  ctx.fillRect(bx+8*px, by+2*px-breathe, px, px);
+  ctx.fillRect(bx+8*px, by+px-breathe, 2*px, px);
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+8*px, by-breathe, 2*px, 2*px);
+  ctx.fillStyle = P.eye;
+  ctx.fillRect(bx+9*px, by+px-breathe, px, px);
+
+  // Mouth (big grin, gold tooth)
+  ctx.fillStyle = '#2a5a3e';
+  ctx.fillRect(bx+9*px, by+6*px-breathe, 3*px, px);
+  ctx.fillRect(bx+10*px, by+7*px-breathe, px, px);
+  ctx.fillStyle = P.gold;
+  ctx.fillRect(bx+11*px, by+6*px-breathe, px, px);
+
+  // CAPTAIN'S TRICORN + CROWN
+  ctx.fillStyle = P.hatDk; ctx.fillRect(bx+2*px, by+2*px-breathe, 7*px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx+3*px, by+px-breathe, 5*px, px);
+  ctx.fillRect(bx+4*px, by-breathe, 4*px, px);
+  ctx.fillRect(bx+4*px, by-px-breathe, 3*px, px);
+  ctx.fillRect(bx+5*px, by-2*px-breathe, 2*px, px);
+  ctx.fillStyle = P.hatBand; ctx.fillRect(bx+3*px, by+2*px-breathe, 5*px, px);
+  // Big skull
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+5*px, by+px-breathe, 2*px, px);
+  ctx.fillRect(bx+4*px, by-breathe, 4*px, px);
+  // Crown
+  ctx.fillStyle = P.gold;
+  ctx.fillRect(bx+4*px, by-2*px-breathe, 4*px, px);
+  ctx.fillRect(bx+4*px, by-3*px-breathe, px, px);
+  ctx.fillRect(bx+6*px, by-3*px-breathe, px, px);
+  ctx.fillRect(bx+7*px, by-3*px-breathe, px, px);
+  ctx.fillStyle = '#cc3333'; ctx.fillRect(bx+4*px, by-3*px-breathe, px, px);
+  ctx.fillStyle = '#3366cc'; ctx.fillRect(bx+7*px, by-3*px-breathe, px, px);
+
+  // Captain's coat (gold epaulettes)
+  ctx.fillStyle = P.goldDk;
+  ctx.fillRect(bx, by+8*px-breathe, 2*px, px);
+  ctx.fillRect(bx+11*px, by+8*px-breathe, 2*px, px);
+  ctx.fillStyle = P.gold;
+  ctx.fillRect(bx, by+8*px-breathe, px, px);
+  ctx.fillRect(bx+12*px, by+8*px-breathe, px, px);
+
+  // Ornate belt
+  ctx.fillStyle = P.gold;
+  ctx.fillRect(bx, by+12*px-breathe, 13*px, px);
+  ctx.fillStyle = P.sparkle;
+  ctx.fillRect(bx+6*px, by+12*px-breathe, 2*px, px);
+  ctx.fillStyle = '#cc3333';
+  ctx.fillRect(bx+7*px, by+12*px-breathe, px, px);
+
+  // Treasure chest on back
+  ctx.fillStyle = '#7a5c3a';
+  ctx.fillRect(bx-px, by+9*px-breathe, 3*px, 4*px);
+  ctx.fillStyle = '#5c3a1e';
+  ctx.fillRect(bx-px, by+9*px-breathe, 3*px, px);
+  ctx.fillRect(bx-px, by+12*px-breathe, 3*px, px);
+  ctx.fillStyle = P.gold;
+  ctx.fillRect(bx, by+10*px-breathe, px, 2*px);
+  // Coins
+  ctx.fillStyle = P.sparkle;
+  ctx.fillRect(bx+2*px, by+12*px-breathe, px, px);
+  if (Math.sin(t/300)>0.4) ctx.fillRect(bx+px, by+13*px-breathe, px, px);
+
+  // Dual cutlasses crossed behind
+  ctx.fillStyle = P.metalLt;
+  const sb = Math.sin(t/350)*px*0.3;
+  ctx.fillRect(bx-3*px, by+5*px-breathe+sb, px, px);
+  ctx.fillRect(bx-4*px, by+4*px-breathe+sb, px, px);
+  ctx.fillRect(bx-5*px, by+3*px-breathe+sb, px, px);
+  ctx.fillRect(bx+14*px, by+5*px-breathe-sb, px, px);
+  ctx.fillRect(bx+15*px, by+4*px-breathe-sb, px, px);
+  ctx.fillRect(bx+16*px, by+3*px-breathe-sb, px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx-3*px, by+6*px-breathe+sb, px, 2*px);
+  ctx.fillRect(bx+14*px, by+6*px-breathe-sb, px, 2*px);
+  ctx.fillStyle = P.buckle;
+  ctx.fillRect(bx-4*px, by+6*px-breathe+sb, 3*px, px);
+  ctx.fillRect(bx+13*px, by+6*px-breathe-sb, 3*px, px);
+}
+
+// =============================================
+// OCTOPUS LINE — Octopus → Kraken → Leviathan
+// =============================================
+function drawOcto1(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/600)*px*0.4;
+  by -= breathe;
+
+  // Tentacles (6 visible, wiggly)
+  ctx.fillStyle = '#5a3a8a';
+  for (let i = 0; i < 3; i++) {
+    const tw = Math.sin(t/300+i*1.8)*px;
+    ctx.fillRect(bx+i*3*px+tw, by+9*px, px, 2*px);
+    ctx.fillRect(bx+i*3*px+tw+(i%2?px:-px), by+11*px, px, px);
+    ctx.fillRect(bx+(8+i)*px-tw, by+9*px, px, 2*px);
+    ctx.fillRect(bx+(8+i)*px-tw+(i%2?-px:px), by+11*px, px, px);
+  }
+
+  // Head dome
+  ctx.fillStyle = '#7a5aaa';
+  ctx.fillRect(bx+2*px, by+6*px, 8*px, 3*px);
+  ctx.fillRect(bx+3*px, by+4*px, 6*px, 2*px);
+  ctx.fillRect(bx+4*px, by+3*px, 4*px, px);
+  ctx.fillRect(bx+4*px, by+2*px, 3*px, px);
+  ctx.fillRect(bx+5*px, by+px, 2*px, px);
+
+  // Belly
+  ctx.fillStyle = '#9a7acc';
+  ctx.fillRect(bx+3*px, by+7*px, 6*px, px);
+  ctx.fillRect(bx+2*px, by+8*px, 8*px, px);
+
+  // Spots
+  ctx.fillStyle = '#6a4a9a';
+  ctx.fillRect(bx+4*px, by+4*px, px, px);
+  ctx.fillRect(bx+8*px, by+5*px, px, px);
+
+  // Eyes (big, cute)
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+4*px, by+5*px, 2*px, 2*px);
+  ctx.fillRect(bx+7*px, by+5*px, 2*px, 2*px);
+  ctx.fillStyle = P.eye;
+  const blink = Math.sin(t/2000)>0.92;
+  if (!blink) {
+    ctx.fillRect(bx+5*px, by+6*px, px, px);
+    ctx.fillRect(bx+8*px, by+6*px, px, px);
+  }
+
+  // Mouth
+  ctx.fillStyle = '#4a2a6a';
+  ctx.fillRect(bx+6*px, by+7*px, px, px);
+
+  // Bandana
+  ctx.fillStyle = '#cc3333';
+  ctx.fillRect(bx+4*px, by+3*px, 4*px, px);
+  ctx.fillStyle = '#aa2222';
+  ctx.fillRect(bx+7*px, by+3*px, 2*px, px);
+  ctx.fillRect(bx+8*px, by+4*px, px, px);
+}
+
+function drawOcto2(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/600)*px*0.4;
+  by -= breathe;
+
+  // More tentacles (8 visible, longer)
+  ctx.fillStyle = '#5a3a8a';
+  for (let i = 0; i < 4; i++) {
+    const tw = Math.sin(t/250+i*1.5)*px;
+    const len = 3 + (i%2);
+    // Left
+    ctx.fillRect(bx+i*2*px+tw-px, by+11*px, px, len*px);
+    ctx.fillRect(bx+i*2*px+tw-px+(i%2?px:-px), by+11*px+len*px, px, px);
+    // Right
+    ctx.fillRect(bx+(9+i*2)*px-tw, by+11*px, px, len*px);
+    ctx.fillRect(bx+(9+i*2)*px-tw+(i%2?-px:px), by+11*px+len*px, px, px);
+  }
+  // Sucker detail
+  ctx.fillStyle = '#9a7acc';
+  for (let i = 0; i < 3; i++) {
+    const tw = Math.sin(t/250+i*2)*px;
+    ctx.fillRect(bx+i*3*px+tw, by+13*px, px, px);
+  }
+
+  // Bigger head
+  ctx.fillStyle = '#7a5aaa';
+  ctx.fillRect(bx+px, by+7*px, 12*px, 4*px);
+  ctx.fillRect(bx+2*px, by+5*px, 10*px, 2*px);
+  ctx.fillRect(bx+3*px, by+3*px, 8*px, 2*px);
+  ctx.fillRect(bx+4*px, by+2*px, 6*px, px);
+  ctx.fillRect(bx+5*px, by+px, 4*px, px);
+
+  // Belly
+  ctx.fillStyle = '#9a7acc';
+  ctx.fillRect(bx+3*px, by+9*px, 8*px, px);
+  ctx.fillRect(bx+2*px, by+10*px, 10*px, px);
+
+  // Eyes (bigger, angrier)
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+3*px, by+6*px, 3*px, 2*px);
+  ctx.fillRect(bx+8*px, by+6*px, 3*px, 2*px);
+  ctx.fillStyle = P.eye;
+  ctx.fillRect(bx+5*px, by+7*px, px, px);
+  ctx.fillRect(bx+10*px, by+7*px, px, px);
+  // Angry brow
+  ctx.fillStyle = '#5a3a8a';
+  ctx.fillRect(bx+3*px, by+5*px, 2*px, px);
+  ctx.fillRect(bx+9*px, by+5*px, 2*px, px);
+
+  // Mouth
+  ctx.fillStyle = '#4a2a6a';
+  ctx.fillRect(bx+6*px, by+9*px, 2*px, px);
+
+  // Pirate hat
+  ctx.fillStyle = P.hatDk; ctx.fillRect(bx+3*px, by+px, 8*px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx+4*px, by, 6*px, px);
+  ctx.fillRect(bx+5*px, by-px, 4*px, px);
+  ctx.fillRect(bx+6*px, by-2*px, 2*px, px);
+  ctx.fillStyle = P.hatBand; ctx.fillRect(bx+4*px, by+px, 6*px, px);
+  ctx.fillStyle = P.eyeW; ctx.fillRect(bx+6*px, by, 2*px, px);
+
+  // Anchor accessory (hanging from tentacle)
+  ctx.fillStyle = P.metal;
+  ctx.fillRect(bx+13*px, by+12*px, px, 3*px);
+  ctx.fillRect(bx+12*px, by+14*px, 3*px, px);
+  ctx.fillRect(bx+12*px, by+15*px, px, px);
+  ctx.fillRect(bx+14*px, by+15*px, px, px);
+  ctx.fillRect(bx+13*px, by+11*px, px, px);
+  // Anchor ring
+  ctx.fillRect(bx+12*px, by+11*px, 3*px, px);
+
+  // Ink cloud
+  ctx.fillStyle = '#2a1a3a55';
+  const inkPhase = Math.sin(t/800);
+  if (inkPhase > 0.5) {
+    ctx.fillRect(bx-2*px, by+10*px, 2*px, 2*px);
+    ctx.fillRect(bx-3*px, by+11*px, px, px);
+  }
+}
+
+function drawOcto3(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/600)*px*0.5;
+  by -= breathe;
+
+  // MASSIVE tentacles everywhere
+  ctx.fillStyle = '#5a3a8a';
+  for (let i = 0; i < 5; i++) {
+    const tw = Math.sin(t/200+i*1.2)*px*1.5;
+    const len = 4 + (i%3);
+    // Left
+    ctx.fillRect(bx-px+i*2*px+tw, by+14*px, 2*px, len*px);
+    ctx.fillRect(bx-px+i*2*px+tw+Math.sin(t/250+i)*px, by+14*px+len*px, px, 2*px);
+    // Right
+    ctx.fillRect(bx+(11+i*2)*px-tw, by+14*px, 2*px, len*px);
+    ctx.fillRect(bx+(11+i*2)*px-tw+Math.sin(t/250+i+3)*px, by+14*px+len*px, px, 2*px);
+  }
+  // Glowing suckers
+  ctx.fillStyle = '#aa88dd';
+  for (let i = 0; i < 4; i++) {
+    const tw = Math.sin(t/200+i*1.5)*px;
+    ctx.globalAlpha = 0.5+Math.sin(t/300+i)*0.3;
+    ctx.fillRect(bx+i*3*px+tw, by+17*px, px, px);
+    ctx.fillRect(bx+(12+i*2)*px-tw, by+16*px, px, px);
+  }
+  ctx.globalAlpha = 1;
+
+  // MASSIVE head
+  ctx.fillStyle = '#7a5aaa';
+  ctx.fillRect(bx, by+9*px, 16*px, 5*px);
+  ctx.fillRect(bx+px, by+7*px, 14*px, 2*px);
+  ctx.fillRect(bx+2*px, by+5*px, 12*px, 2*px);
+  ctx.fillRect(bx+3*px, by+3*px, 10*px, 2*px);
+  ctx.fillRect(bx+4*px, by+2*px, 8*px, px);
+  ctx.fillRect(bx+5*px, by+px, 6*px, px);
+  ctx.fillRect(bx+6*px, by, 4*px, px);
+
+  // Belly
+  ctx.fillStyle = '#9a7acc';
+  ctx.fillRect(bx+3*px, by+12*px, 10*px, px);
+  ctx.fillRect(bx+px, by+13*px, 14*px, px);
+
+  // Glowing patterns on head
+  ctx.fillStyle = '#aa88ff';
+  ctx.globalAlpha = 0.4+Math.sin(t/500)*0.2;
+  ctx.fillRect(bx+3*px, by+6*px, 2*px, px);
+  ctx.fillRect(bx+11*px, by+6*px, 2*px, px);
+  ctx.fillRect(bx+6*px, by+4*px, px, px);
+  ctx.fillRect(bx+9*px, by+4*px, px, px);
+  ctx.globalAlpha = 1;
+
+  // GLOWING EYES (massive, menacing)
+  ctx.fillStyle = '#ffcc44';
+  ctx.fillRect(bx+3*px, by+8*px, 4*px, 3*px);
+  ctx.fillRect(bx+9*px, by+8*px, 4*px, 3*px);
+  ctx.fillStyle = '#ff8800';
+  ctx.fillRect(bx+5*px, by+9*px, 2*px, 2*px);
+  ctx.fillRect(bx+11*px, by+9*px, 2*px, 2*px);
+  ctx.fillStyle = P.eye;
+  ctx.fillRect(bx+6*px, by+10*px, px, px);
+  ctx.fillRect(bx+12*px, by+10*px, px, px);
+  // Eye glow
+  ctx.fillStyle = '#ffcc4433';
+  ctx.fillRect(bx+2*px, by+7*px, 6*px, 5*px);
+  ctx.fillRect(bx+8*px, by+7*px, 6*px, 5*px);
+
+  // Mouth (massive, toothy)
+  ctx.fillStyle = '#2a1a3a';
+  ctx.fillRect(bx+6*px, by+12*px, 4*px, px);
+  ctx.fillStyle = P.eyeW;
+  ctx.fillRect(bx+7*px, by+12*px, px, px);
+  ctx.fillRect(bx+9*px, by+12*px, px, px);
+
+  // Ship wheel on back
+  ctx.fillStyle = '#7a5c3a';
+  ctx.fillRect(bx-3*px, by+6*px, 4*px, 4*px);
+  ctx.fillStyle = '#5a3c1a';
+  ctx.fillRect(bx-2*px, by+7*px, 2*px, 2*px);
+  // Spokes
+  ctx.fillStyle = '#7a5c3a';
+  ctx.fillRect(bx-px, by+5*px, px, px);
+  ctx.fillRect(bx-px, by+10*px, px, px);
+  ctx.fillRect(bx-4*px, by+8*px, px, px);
+  ctx.fillRect(bx+px, by+8*px, px, px);
+
+  // Captain's hat with crown
+  ctx.fillStyle = P.hatDk; ctx.fillRect(bx+3*px, by+px, 10*px, px);
+  ctx.fillStyle = P.hat;
+  ctx.fillRect(bx+4*px, by, 8*px, px);
+  ctx.fillRect(bx+5*px, by-px, 6*px, px);
+  ctx.fillRect(bx+6*px, by-2*px, 4*px, px);
+  ctx.fillRect(bx+7*px, by-3*px, 2*px, px);
+  ctx.fillStyle = P.hatBand; ctx.fillRect(bx+4*px, by+px, 8*px, px);
+  ctx.fillStyle = P.eyeW; ctx.fillRect(bx+7*px, by, 2*px, px);
+  // Crown
+  ctx.fillStyle = P.gold;
+  ctx.fillRect(bx+6*px, by-3*px, 4*px, px);
+  ctx.fillRect(bx+6*px, by-4*px, px, px);
+  ctx.fillRect(bx+8*px, by-4*px, px, px);
+  ctx.fillRect(bx+9*px, by-4*px, px, px);
+  ctx.fillStyle = '#cc3333'; ctx.fillRect(bx+6*px, by-4*px, px, px);
+  ctx.fillStyle = '#3366cc'; ctx.fillRect(bx+9*px, by-4*px, px, px);
+
+  // Whirlpool particles
+  ctx.fillStyle = '#6a8acc44';
+  for (let i = 0; i < 4; i++) {
+    const angle = (i/4)*Math.PI*2 + t/800;
+    const dist = 12 + Math.sin(t/400+i)*3;
+    const wx = Math.floor(bx+8*px + Math.cos(angle)*dist*px);
+    const wy = Math.floor(by+10*px + Math.sin(angle)*dist*px*0.5);
+    ctx.fillRect(wx, wy, px, px);
+  }
+}
+
+// =============================================
+// BIRD LINE (kept from before — already working great)
+// =============================================
+function drawBird1(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/700)*px*0.3;
+  by -= breathe;
+  ctx.fillStyle = '#7a5c3a'; ctx.fillRect(bx-2*px, by+9*px, 14*px, px);
+  ctx.fillStyle = '#5a3c1a'; ctx.fillRect(bx-2*px, by+10*px, 14*px, px);
+  ctx.fillStyle = '#cc3333'; ctx.fillRect(bx, by+7*px, px, 2*px); ctx.fillRect(bx-px, by+8*px, px, 2*px); ctx.fillRect(bx+px, by+8*px, px, px);
+  ctx.fillStyle = '#2a9a4a'; ctx.fillRect(bx+2*px, by+4*px, 7*px, 5*px); ctx.fillRect(bx+3*px, by+3*px, 5*px, px);
+  ctx.fillStyle = '#e0c030'; ctx.fillRect(bx+5*px, by+5*px, 3*px, 3*px);
+  ctx.fillStyle = '#cc3333'; ctx.fillRect(bx+2*px, by+4*px, 2*px, 4*px);
+  ctx.fillStyle = '#2a9a4a'; ctx.fillRect(bx+4*px, by+px, 4*px, 2*px); ctx.fillRect(bx+5*px, by, 2*px, px);
+  ctx.fillStyle = '#cc3333'; ctx.fillRect(bx+5*px, by-px, px, px); ctx.fillRect(bx+6*px, by-2*px, px, px);
+  ctx.fillStyle = P.eyeW; ctx.fillRect(bx+6*px, by+px, px, 2*px);
+  ctx.fillStyle = P.eye; const blink=Math.sin(t/2000)>0.92; if(!blink) ctx.fillRect(bx+6*px,by+2*px,px,px);
+  ctx.fillStyle = '#e0a020'; ctx.fillRect(bx+8*px, by+2*px, 2*px, px); ctx.fillRect(bx+8*px, by+3*px, px, px);
+  ctx.fillStyle = P.hat; ctx.fillRect(bx+4*px, by, 3*px, px); ctx.fillStyle = P.hatBand; ctx.fillRect(bx+4*px, by+px, 3*px, px);
+  ctx.fillStyle = '#c08010'; ctx.fillRect(bx+4*px, by+9*px, px, px); ctx.fillRect(bx+7*px, by+9*px, px, px);
+}
+
+function drawBird2(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/700)*px*0.3;
+  by -= breathe;
+  ctx.fillStyle='#7a5c3a'; ctx.fillRect(bx-3*px,by+11*px,18*px,px); ctx.fillStyle='#5a3c1a'; ctx.fillRect(bx-3*px,by+12*px,18*px,px);
+  ctx.fillStyle='#5a3a1e'; ctx.fillRect(bx-px,by+9*px,2*px,2*px); ctx.fillRect(bx-2*px,by+10*px,2*px,2*px); ctx.fillRect(bx-3*px,by+10*px,px,px);
+  ctx.fillStyle='#3a2a1e'; ctx.fillRect(bx,by+10*px,px,px);
+  ctx.fillStyle='#5a3a1e'; ctx.fillRect(bx+2*px,by+5*px,9*px,6*px); ctx.fillRect(bx+3*px,by+4*px,7*px,px);
+  ctx.fillStyle='#e8e0d0'; ctx.fillRect(bx+6*px,by+6*px,4*px,4*px); ctx.fillRect(bx+5*px,by+7*px,px,2*px);
+  ctx.fillStyle='#3a2a1e'; ctx.fillRect(bx+px,by+5*px,2*px,5*px); ctx.fillRect(bx,by+6*px,px,3*px);
+  const flap=Math.sin(t/800)*px*0.3; ctx.fillRect(bx-px,by+6*px+flap,px,2*px);
+  ctx.fillStyle='#e8e0d0'; ctx.fillRect(bx+5*px,by+px,5*px,3*px); ctx.fillRect(bx+6*px,by,3*px,px);
+  ctx.fillStyle='#cc8800'; ctx.fillRect(bx+8*px,by+2*px,px,2*px); ctx.fillStyle=P.eye; ctx.fillRect(bx+8*px,by+3*px,px,px);
+  ctx.fillStyle='#d4a030'; ctx.fillRect(bx+10*px,by+2*px,2*px,px); ctx.fillRect(bx+10*px,by+3*px,2*px,px); ctx.fillRect(bx+11*px,by+4*px,px,px);
+  ctx.fillStyle=P.hatDk; ctx.fillRect(bx+4*px,by,5*px,px); ctx.fillStyle=P.hat; ctx.fillRect(bx+5*px,by-px,3*px,px); ctx.fillRect(bx+6*px,by-2*px,px,px);
+  ctx.fillStyle=P.hatBand; ctx.fillRect(bx+5*px,by,3*px,px); ctx.fillStyle=P.eyeW; ctx.fillRect(bx+6*px,by-px,px,px);
+  ctx.fillStyle='#d4a030'; ctx.fillRect(bx+4*px,by+11*px,2*px,px); ctx.fillRect(bx+8*px,by+11*px,2*px,px);
+}
+
+function drawBird3(ctx, px, bx, by) {
+  const t = Date.now();
+  const breathe = Math.sin(t/600)*px*0.4;
+  by -= breathe;
+  ctx.fillStyle='#5a3a1e'; ctx.fillRect(bx-4*px,by+13*px,22*px,px); ctx.fillRect(bx-4*px,by+14*px,22*px,px);
+  ctx.fillStyle='#cc4400'; const fl=Math.sin(t/150); ctx.fillRect(bx-2*px,by+12*px,px,px); ctx.fillRect(bx+15*px,by+12*px,px,px);
+  if(fl>0){ctx.fillStyle='#ff8800';ctx.fillRect(bx-px,by+12*px,px,px);ctx.fillRect(bx+14*px,by+12*px,px,px);}
+  ctx.fillStyle='#cc4400'; ctx.fillRect(bx-2*px,by+10*px,3*px,3*px); ctx.fillRect(bx-4*px,by+11*px,3*px,2*px); ctx.fillRect(bx-5*px,by+10*px,2*px,2*px);
+  ctx.fillStyle='#ff8800'; ctx.fillRect(bx-3*px,by+10*px,2*px,px); ctx.fillRect(bx-5*px,by+11*px,px,px);
+  ctx.fillStyle='#ffcc00'; ctx.fillRect(bx-px,by+11*px,px,px);
+  const fli=Math.floor(t/100)%3; ctx.fillStyle=['#ff8800','#ffcc00','#cc4400'][fli]; ctx.fillRect(bx-4*px-fli*px,by+10*px,px,px);
+  ctx.fillStyle='#cc4400'; ctx.fillRect(bx+2*px,by+6*px,11*px,7*px); ctx.fillRect(bx+3*px,by+5*px,9*px,px); ctx.fillRect(bx+4*px,by+4*px,7*px,px);
+  ctx.fillStyle='#ff6600'; ctx.fillRect(bx+4*px,by+6*px,7*px,2*px); ctx.fillStyle='#ffaa00'; ctx.fillRect(bx+5*px,by+7*px,5*px,px);
+  ctx.fillStyle='#ffcc00'; ctx.fillRect(bx+7*px,by+8*px,4*px,4*px); ctx.fillStyle='#ffe060'; ctx.fillRect(bx+8*px,by+9*px,2*px,2*px);
+  ctx.fillStyle='#cc4400'; ctx.fillRect(bx+px,by+6*px,2*px,5*px); ctx.fillRect(bx,by+7*px,px,3*px); ctx.fillRect(bx-px,by+7*px,px,2*px);
+  ctx.fillStyle='#ff8800'; ctx.fillRect(bx-px,by+6*px,px,px); ctx.fillRect(bx,by+5*px,px,px);
+  const wf=Math.sin(t/120); if(wf>0){ctx.fillStyle='#ffcc00';ctx.fillRect(bx-2*px,by+7*px,px,px);}
+  ctx.fillStyle='#cc4400'; ctx.fillRect(bx+12*px,by+6*px,2*px,4*px); ctx.fillRect(bx+13*px,by+7*px,px,2*px);
+  ctx.fillStyle='#ff8800'; ctx.fillRect(bx+14*px,by+7*px,px,px);
+  ctx.fillStyle='#cc4400'; ctx.fillRect(bx+6*px,by+px,5*px,3*px); ctx.fillRect(bx+7*px,by,3*px,px);
+  ctx.fillStyle='#ff6600'; ctx.fillRect(bx+7*px,by+px,3*px,px);
+  ctx.fillStyle='#ff8800'; ctx.fillRect(bx+7*px,by-px,px,px); ctx.fillRect(bx+8*px,by-2*px,px,px); ctx.fillRect(bx+9*px,by-px,px,px);
+  ctx.fillStyle='#ffcc00'; const cp=Math.floor(t/80)%2; ctx.fillRect(bx+8*px,by-3*px-cp*px,px,px); ctx.fillRect(bx+7*px,by-2*px-cp*px,px,px);
+  ctx.fillStyle='#ffcc00'; ctx.fillRect(bx+9*px,by+2*px,px,2*px); ctx.fillStyle='#ff4400'; ctx.fillRect(bx+9*px,by+3*px,px,px);
+  ctx.fillStyle='#e0a020'; ctx.fillRect(bx+11*px,by+2*px,2*px,px); ctx.fillRect(bx+11*px,by+3*px,2*px,px); ctx.fillRect(bx+12*px,by+4*px,px,px);
+  ctx.fillStyle='#ff880066'; if(Math.sin(t/300)>0.7) ctx.fillRect(bx+13*px,by+3*px,px,px);
+  ctx.fillStyle=P.hatDk; ctx.fillRect(bx+5*px,by,5*px,px); ctx.fillStyle=P.hat; ctx.fillRect(bx+6*px,by-px,3*px,px);
+  ctx.fillStyle=P.hatBand; ctx.fillRect(bx+6*px,by,3*px,px); ctx.fillStyle=P.eyeW; ctx.fillRect(bx+7*px,by-px,2*px,px);
+  ctx.fillStyle=P.gold; ctx.fillRect(bx+6*px,by-2*px,4*px,px);
+  ctx.fillStyle='#ff4400'; ctx.fillRect(bx+6*px,by-3*px,px,px); ctx.fillRect(bx+8*px,by-3*px,px,px);
+  ctx.fillStyle='#ffcc00'; ctx.fillRect(bx+7*px,by-3*px,px,px); ctx.fillRect(bx+9*px,by-3*px,px,px);
+  ctx.fillStyle=P.gold; ctx.fillRect(bx+5*px,by+13*px,2*px,px); ctx.fillRect(bx+9*px,by+13*px,2*px,px);
+  ctx.fillRect(bx+4*px,by+13*px,px,px); ctx.fillRect(bx+10*px,by+13*px,px,px);
+  ctx.fillStyle='#ff880088';
+  for(let i=0;i<3;i++){const fy=Math.floor(t/200+i*100)%8;const fx=Math.sin(t/300+i*2)*2;ctx.fillRect(bx+(3+i*4)*px+fx*px,by-px-fy*px,px,px);}
+}
+
+// =============================================
+// BUILD GRID
+// =============================================
+const grid = document.getElementById('grid');
+const creatures = [
+  { name:'Slug',    stages:['Slug','Slugger','Sluggest'], desc:'Pure slug escalation', draws:[drawSlug1,drawSlug2,drawSlug3] },
+  { name:'Octopus', stages:['Octopus','Kraken','Leviathan'], desc:'Baby octo → deep sea terror', draws:[drawOcto1,drawOcto2,drawOcto3] },
+  { name:'Bird',    stages:['Parrot','Eagle','Phoenix'], desc:'Parrot → raptor → literal fire', draws:[drawBird1,drawBird2,drawBird3] },
+];
+
+const empty = document.createElement('div'); empty.className='evo-header'; empty.textContent=''; grid.appendChild(empty);
+['Stage 1','Stage 2 (Lv 30)','Stage 3 (Lv 50)'].forEach((s,i) => {
+  const h = document.createElement('div'); h.className='evo-header';
+  h.innerHTML = s + '<span class="stage">' + ['Baby','Evolved','Final'][i] + '</span>';
+  grid.appendChild(h);
+});
+
+const canvases = [];
+for (const c of creatures) {
+  const lbl = document.createElement('div'); lbl.className='evo-label';
+  lbl.innerHTML = `<span class="evo-label-name">${c.name}</span><span class="evo-label-desc">${c.desc}</span>`;
+  grid.appendChild(lbl);
+  for (let s = 0; s < 3; s++) {
+    const cell = document.createElement('div'); cell.className='evo-cell';
+    const cvs = document.createElement('canvas');
+    cvs.width = 200; cvs.height = 180; cvs.style.width = '200px'; cvs.style.height = '180px';
+    cell.appendChild(cvs); grid.appendChild(cell);
+    canvases.push({ canvas: cvs, draw: c.draws[s] });
+  }
+}
+
+function render() {
+  requestAnimationFrame(render);
+  for (const { canvas, draw } of canvases) {
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 200, 180);
+    ctx.fillStyle = '#0f1f15'; ctx.fillRect(0, 0, 200, 180);
+    ctx.fillStyle = '#2d6a4f'; ctx.fillRect(0, 140, 200, 40);
+    ctx.fillStyle = '#1b4332'; ctx.fillRect(0, 140, 200, 2);
+    draw(ctx, 5, 50, 70);
+  }
+}
+render();
+</script>
+</body>
+</html>

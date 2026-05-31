@@ -1,0 +1,182 @@
+.habitat-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.habitat-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.habitat-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.habitat-status-message {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-primary);
+  font-style: italic;
+  text-align: center;
+}
+
+.habitat-status-details {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.habitat-stat {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+}
+
+.habitat-stat-warn {
+  color: var(--color-bug);
+}
+
+.habitat-death {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+}
+
+.habitat-death-title {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.habitat-death-subtitle {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.habitat-death-message {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  text-align: center;
+  max-width: 320px;
+}
+
+.habitat-death-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.habitat-btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.habitat-btn-primary {
+  background: var(--slug-green);
+  color: #fff;
+  border-color: var(--slug-green);
+}
+
+.habitat-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.habitat-btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.habitat-btn-secondary:hover {
+  background: var(--bg-primary);
+}
+
+/* Vacation toggle */
+.habitat-vacation-btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.habitat-vacation-btn:hover {
+  border-color: var(--border-hover);
+}
+
+.habitat-vacation-btn.active {
+  background: #0a3d5c;
+  color: #c2a04e;
+  border-color: #1a6b8a;
+}
+
+/* Mood preview selector */
+.habitat-mood-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  width: 100%;
+}
+
+.habitat-mood-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.habitat-mood-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+
+.habitat-mood-btn.active {
+  background: var(--slug-green);
+  color: #fff;
+  border-color: var(--slug-green);
+}
+
+.habitat-graveyard-toggle {
+  margin-top: 8px;
+}
+
+.habitat-divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+}

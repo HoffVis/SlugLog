@@ -1,17 +1,6 @@
 import { useState } from "react";
 import "./SlugMood.css";
 
-// Import all slug images
-import amazed from "../assets/slugs/Amazed_Slug.png";
-import impressed from "../assets/slugs/Impressed_Slug.png";
-import worried from "../assets/slugs/Worried_Slug.png";
-import judgemental from "../assets/slugs/Judgemental_Slug.png";
-import existential from "../assets/slugs/Existential_Crisis_Slug.png";
-import hungry from "../assets/slugs/Hungry_Slug.png";
-import dying from "../assets/slugs/Dying_Slug.png";
-import ghost from "../assets/slugs/Ghost_Slug.png";
-import vacation from "../assets/slugs/Vecation_Slug.png";
-
 export type SlugMoodType =
   | "amazed"
   | "impressed"
@@ -26,17 +15,17 @@ export type SlugMoodType =
   | "weekend";
 
 const SLUG_IMAGES: Record<string, string> = {
-  amazed,
-  impressed,
-  happy: impressed,
-  worried,
-  judgemental,
-  existential,
-  hungry,
-  dying,
-  ghost,
-  vacation,
-  weekend: vacation,
+  amazed: "/sprites/slug/slug-amazed.png",
+  impressed: "/sprites/slug/slug-impressed.png",
+  happy: "/sprites/slug/slug-happy.png",
+  worried: "/sprites/slug/slug-worried.png",
+  judgemental: "/sprites/slug/slug-judgemental.png",
+  existential: "/sprites/slug/slug-existential.png",
+  hungry: "/sprites/slug/slug-hungry.png",
+  dying: "/sprites/slug/slug-dying.png",
+  ghost: "/sprites/slug/slug-dead.png",
+  vacation: "/sprites/slug/slug-vacation.png",
+  weekend: "/sprites/slug/slug-happy.png",
 };
 
 // ===== MESSAGES BY MOOD =====

@@ -1,0 +1,106 @@
+.hatch-ceremony {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hatch-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.hatch-ceremony-small .hatch-canvas {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 160 / 120;
+}
+
+.hatch-ceremony-large .hatch-canvas {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  aspect-ratio: 400 / 300;
+}
+
+.hatch-hint {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.hatch-naming {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.hatch-naming-title {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hatch-naming-subtitle {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.hatch-naming-input {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  text-align: center;
+  width: 200px;
+  outline: none;
+}
+
+.hatch-naming-input:focus {
+  border-color: var(--slug-green);
+}
+
+.hatch-naming-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.hatch-btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.hatch-btn-primary {
+  background: var(--slug-green);
+  color: #fff;
+  border-color: var(--slug-green);
+}
+
+.hatch-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.hatch-btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.hatch-btn-secondary:hover {
+  background: var(--bg-primary);
+}

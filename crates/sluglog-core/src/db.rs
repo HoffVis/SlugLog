@@ -101,6 +101,16 @@ impl Database {
                 color TEXT
             );
 
+            CREATE TABLE IF NOT EXISTS creatures (
+                id TEXT PRIMARY KEY,
+                creature_type TEXT NOT NULL DEFAULT 'slug',
+                name TEXT,
+                born_at TEXT NOT NULL,
+                died_at TEXT,
+                cause_of_death TEXT,
+                generation INTEGER NOT NULL DEFAULT 1
+            );
+
             INSERT OR IGNORE INTO settings (key, value) VALUES ('daily_budget', '8.0');
             INSERT OR IGNORE INTO settings (key, value) VALUES ('daily_air', '1.0');",
         )
@@ -755,6 +765,174 @@ impl Database {
             last_log_date,
             today_hours,
             is_weekend,
+        })
+    }
+
+    // ===== CREATURES =====
+
+    pub fn get_active_creature(&self) -> SqlResult<Option<Creature>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, creature_type, name, born_at, died_at, cause_of_death, generation
+             FROM creatures WHERE died_at IS NULL LIMIT 1",
+        )?;
+        let mut rows = stmt.query_map([], |row| {
+            Ok(Creature {
+                id: row.get(0)?,
+                creature_type: row.get(1)?,
+                name: row.get(2)?,
+                born_at: row.get(3)?,
+                died_at: row.get(4)?,
+                cause_of_death: row.get(5)?,
+                generation: row.get(6)?,
+            })
+        })?;
+        match rows.next() {
+            Some(Ok(c)) => Ok(Some(c)),
+            Some(Err(e)) => Err(e),
+            None => Ok(None),
+        }
+    }
+
+    pub fn get_graveyard(&self) -> SqlResult<Vec<Creature>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, creature_type, name, born_at, died_at, cause_of_death, generation
+             FROM creatures WHERE died_at IS NOT NULL ORDER BY died_at DESC",
+        )?;
+        let creatures = stmt
+            .query_map([], |row| {
+                Ok(Creature {
+                    id: row.get(0)?,
+                    creature_type: row.get(1)?,
+                    name: row.get(2)?,
+                    born_at: row.get(3)?,
+                    died_at: row.get(4)?,
+                    cause_of_death: row.get(5)?,
+                    generation: row.get(6)?,
+                })
+            })?
+            .collect::<SqlResult<Vec<_>>>()?;
+        Ok(creatures)
+    }
+
+    pub fn hatch_creature(&self, creature_type: &str, name: Option<&str>) -> SqlResult<Creature> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let born_at = Local::now().to_rfc3339();
+        let count: i32 = self.conn.query_row(
+            "SELECT COUNT(*) FROM creatures",
+            [],
+            |row| row.get::<_, i32>(0),
+        )?;
+        let generation = count + 1;
+
+        self.conn.execute(
+            "INSERT INTO creatures (id, creature_type, name, born_at, generation)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![id, creature_type, name, born_at, generation],
+        )?;
+
+        Ok(Creature {
+            id,
+            creature_type: creature_type.to_string(),
+            name: name.map(|s| s.to_string()),
+            born_at,
+            died_at: None,
+            cause_of_death: None,
+            generation,
+        })
+    }
+
+    pub fn kill_creature(&self, id: &str, cause: &str) -> SqlResult<()> {
+        let died_at = Local::now().to_rfc3339();
+        self.conn.execute(
+            "UPDATE creatures SET died_at = ?1, cause_of_death = ?2 WHERE id = ?3",
+            params![died_at, cause, id],
+        )?;
+        Ok(())
+    }
+
+    pub fn name_creature(&self, id: &str, name: &str) -> SqlResult<()> {
+        self.conn.execute(
+            "UPDATE creatures SET name = ?1 WHERE id = ?2",
+            params![name, id],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_vacation_mode(&self) -> bool {
+        self.conn
+            .query_row(
+                "SELECT value FROM settings WHERE key = 'vacation_mode'",
+                [],
+                |row| row.get::<_, String>(0),
+            )
+            .map(|v| v == "1")
+            .unwrap_or(false)
+    }
+
+    pub fn set_vacation_mode(&self, on: bool) -> SqlResult<()> {
+        self.conn.execute(
+            "INSERT INTO settings (key, value) VALUES ('vacation_mode', ?1)
+             ON CONFLICT(key) DO UPDATE SET value = ?1",
+            params![if on { "1" } else { "0" }],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_creature_state(&self) -> SqlResult<CreatureState> {
+        let slug_status = self.get_slug_status()?;
+        let creature = self.get_active_creature()?;
+        let vacation_mode = self.get_vacation_mode();
+
+        let graveyard_count: i32 = self.conn.query_row(
+            "SELECT COUNT(*) FROM creatures WHERE died_at IS NOT NULL",
+            [],
+            |row| row.get::<_, i32>(0),
+        )?;
+
+        // Permadeath: auto-kill if alive and 10+ working days missed (but NOT during vacation)
+        let (lifecycle, creature) = if let Some(c) = creature {
+            if !vacation_mode && slug_status.working_days_missed >= 10 {
+                self.kill_creature(&c.id, "neglect")?;
+                let mut dead = c;
+                dead.died_at = Some(Local::now().to_rfc3339());
+                dead.cause_of_death = Some("neglect".to_string());
+                (CreatureLifecycle::Dead, Some(dead))
+            } else {
+                (CreatureLifecycle::Alive, Some(c))
+            }
+        } else {
+            (CreatureLifecycle::Egg, None)
+        };
+
+        // Derive mood string — vacation mode overrides everything
+        let mood = if vacation_mode {
+            "vacation"
+        } else if slug_status.is_weekend {
+            "weekend"
+        } else if slug_status.today_hours > 0.0 && slug_status.working_days_missed == 0 {
+            if slug_status.today_hours >= 8.0 { "amazed" }
+            else if slug_status.today_hours >= 6.0 { "impressed" }
+            else { "happy" }
+        } else {
+            match slug_status.working_days_missed {
+                0 => "happy",
+                1 => "worried",
+                2 => "judgemental",
+                3 => "existential",
+                4..=5 => "hungry",
+                6..=9 => "dying",
+                _ => "ghost",
+            }
+        };
+
+        Ok(CreatureState {
+            lifecycle,
+            creature,
+            graveyard_count,
+            mood: mood.to_string(),
+            working_days_missed: slug_status.working_days_missed,
+            today_hours: slug_status.today_hours,
+            is_weekend: slug_status.is_weekend,
         })
     }
 

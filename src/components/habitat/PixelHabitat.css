@@ -1,0 +1,334 @@
+.pixel-habitat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== Scene container ===== */
+.pixel-habitat-scene {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 1s ease;
+}
+
+.pixel-habitat-small .pixel-habitat-scene {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 8px;
+}
+
+.pixel-habitat-large .pixel-habitat-scene {
+  width: 100%;
+  min-height: 400px;
+  aspect-ratio: 16 / 9;
+  padding: 32px;
+}
+
+/* ===== Scene backgrounds per mood ===== */
+
+/* Happy / default — green meadow */
+.scene-healthy {
+  background: linear-gradient(180deg, #1b4332 0%, #0a2e1c 55%, #2d6a4f 55%, #245a42 100%);
+}
+
+/* Amazed — golden sunset glow */
+.scene-amazed {
+  background: linear-gradient(180deg, #2d1b00 0%, #4a3000 30%, #1b4332 55%, #2d6a4f 55%, #245a42 100%);
+  box-shadow: inset 0 0 60px rgba(255, 200, 50, 0.08);
+}
+
+/* Impressed — warm dusk */
+.scene-impressed {
+  background: linear-gradient(180deg, #1a2f1a 0%, #0f2818 55%, #2d6a4f 55%, #245a42 100%);
+}
+
+/* Vacation — tropical beach */
+.scene-vacation {
+  background: linear-gradient(180deg, #0a3d5c 0%, #1a6b8a 35%, #c2a04e 55%, #d4b35a 55%, #c2a04e 100%);
+}
+
+/* Worried — overcast */
+.scene-worried {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 55%, #3d3025 55%, #332a20 100%);
+}
+
+/* Judgemental — dark and cold */
+.scene-judgemental {
+  background: linear-gradient(180deg, #1e1e2e 0%, #15152a 55%, #2a2535 55%, #221e30 100%);
+}
+
+/* Existential — void purple */
+.scene-existential {
+  background: linear-gradient(180deg, #0d0d1a 0%, #1a1025 55%, #15101f 55%, #0d0a15 100%);
+}
+
+/* Hungry — barren wasteland */
+.scene-hungry {
+  background: linear-gradient(180deg, #2d1f0f 0%, #1a1208 55%, #3d2b1f 55%, #2d1f15 100%);
+}
+
+/* Dying — ominous red tint */
+.scene-dying {
+  background: linear-gradient(180deg, #1a0a0a 0%, #2a0f0f 55%, #1a0808 55%, #0d0505 100%);
+  box-shadow: inset 0 0 40px rgba(180, 30, 30, 0.1);
+}
+
+/* Dead / Ghost — cold ethereal */
+.scene-dead {
+  background: linear-gradient(180deg, #0a0a1e 0%, #10102a 55%, #08081a 55%, #050510 100%);
+  box-shadow: inset 0 0 50px rgba(100, 100, 200, 0.06);
+}
+
+/* ===== Sprite ===== */
+.pixel-habitat-sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: auto;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+}
+
+.pixel-habitat-small .pixel-habitat-sprite {
+  height: 75%;
+}
+
+.pixel-habitat-large .pixel-habitat-sprite {
+  height: 60%;
+}
+
+/* ===== Slug animations ===== */
+
+/* Default breathing */
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50% { transform: scaleY(1.02) translateY(-1px); }
+}
+.slug-breathe {
+  animation: breathe 2.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Amazed — excited bounce */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-4px) scale(1.02); }
+  50% { transform: translateY(0) scale(0.98); }
+  70% { transform: translateY(-2px) scale(1.01); }
+}
+.slug-bounce {
+  animation: bounce 1.8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Ghost float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-8px); opacity: 0.85; }
+}
+.slug-float {
+  animation: float 2.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Dying wobble */
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  15% { transform: rotate(-3deg) translateY(1px); }
+  30% { transform: rotate(2deg); }
+  50% { transform: rotate(-1deg) translateY(2px); }
+  70% { transform: rotate(3deg); }
+  85% { transform: rotate(-2deg) translateY(1px); }
+}
+.slug-wobble {
+  animation: wobble 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Existential sway — slow melancholy drift */
+@keyframes sway {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-3px) rotate(-1deg); }
+  75% { transform: translateX(3px) rotate(1deg); }
+}
+.slug-sway {
+  animation: sway 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Hungry shiver */
+@keyframes shiver {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-1px); }
+  20% { transform: translateX(1px); }
+  30% { transform: translateX(-1px); }
+  40% { transform: translateX(0); }
+}
+.slug-shiver {
+  animation: shiver 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Vacation chill — lazy lean */
+@keyframes chill {
+  0%, 100% { transform: rotate(0deg) scaleY(1); }
+  50% { transform: rotate(2deg) scaleY(0.98); }
+}
+.slug-chill {
+  animation: chill 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* ===== Particles layer ===== */
+.pixel-habitat-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Sparkles for happy moods */
+.scene-amazed .pixel-habitat-particles,
+.scene-impressed .pixel-habitat-particles {
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 215, 0, 0.8), transparent),
+    radial-gradient(1px 1px at 70% 20%, rgba(255, 215, 0, 0.6), transparent),
+    radial-gradient(1px 1px at 45% 45%, rgba(255, 215, 0, 0.7), transparent),
+    radial-gradient(1px 1px at 80% 60%, rgba(255, 215, 0, 0.5), transparent),
+    radial-gradient(1px 1px at 15% 70%, rgba(255, 215, 0, 0.6), transparent);
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Rain for existential */
+.scene-existential .pixel-habitat-particles {
+  background-image:
+    linear-gradient(transparent 0%, rgba(100, 100, 180, 0.15) 100%);
+  animation: rain-fade 2s ease-in-out infinite;
+}
+
+.scene-existential .pixel-habitat-particles::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(120, 130, 180, 0.12) 7px, rgba(120, 130, 180, 0.12) 8px);
+  animation: rain-fall 0.8s linear infinite;
+}
+
+@keyframes rain-fall {
+  from { transform: translateY(-10px); }
+  to { transform: translateY(20px); }
+}
+
+@keyframes rain-fade {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Ghost wisps */
+.scene-dead .pixel-habitat-particles::before,
+.scene-dead .pixel-habitat-particles::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(150, 150, 255, 0.1), transparent 70%);
+}
+
+.scene-dead .pixel-habitat-particles::before {
+  top: 25%;
+  left: 20%;
+  animation: wisp 6s ease-in-out infinite;
+}
+
+.scene-dead .pixel-habitat-particles::after {
+  bottom: 30%;
+  right: 15%;
+  animation: wisp 6s ease-in-out infinite 3s;
+}
+
+@keyframes wisp {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0; }
+  50% { transform: translate(10px, -15px) scale(1.5); opacity: 1; }
+}
+
+/* Dying — red pulse */
+.scene-dying .pixel-habitat-particles {
+  animation: danger-pulse 2s ease-in-out infinite;
+}
+
+@keyframes danger-pulse {
+  0%, 100% { background: transparent; }
+  50% { background: rgba(180, 30, 30, 0.05); }
+}
+
+/* Vacation — sun shimmer */
+.scene-vacation .pixel-habitat-particles {
+  background-image:
+    radial-gradient(2px 2px at 80% 15%, rgba(255, 255, 200, 0.8), transparent),
+    radial-gradient(40px 40px at 85% 10%, rgba(255, 220, 100, 0.15), transparent);
+  animation: sun-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes sun-shimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ===== Speech bubble ===== */
+.pixel-habitat-bubble {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  animation: bubble-pop 0.15s ease-out;
+  z-index: 10;
+}
+
+.pixel-habitat-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  text-align: center;
+}
+
+@keyframes bubble-pop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}

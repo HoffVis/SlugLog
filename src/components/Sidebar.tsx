@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { getTickets } from "../lib/commands";
-import { SlugMood, getSlugMoodFromStreak, getSlugMessage } from "./SlugMood";
-import type { SlugMoodType } from "./SlugMood";
-import type { Ticket, WeekSummary } from "../lib/types";
+import { getTickets, getCreatureState } from "../lib/commands";
+import { PixelHabitat } from "./habitat/PixelHabitat";
+import { HatchCeremony } from "./habitat/HatchCeremony";
+import type { Ticket, WeekSummary, CreatureState } from "../lib/types";
 import "./Sidebar.css";
 
 interface SidebarProps {
@@ -23,8 +22,15 @@ const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
 export function Sidebar({ summary }: SidebarProps) {
   const [activeTimers, setActiveTimers] = useState<Ticket[]>([]);
-  const [slugMood, setSlugMood] = useState<SlugMoodType>("happy");
-  const [slugMessage, setSlugMessage] = useState("");
+  const [creatureState, setCreatureState] = useState<CreatureState | null>(null);
+
+  const loadCreatureState = async () => {
+    try {
+      setCreatureState(await getCreatureState());
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -34,15 +40,7 @@ export function Sidebar({ summary }: SidebarProps) {
       } catch {
         // ignore
       }
-      try {
-        const status: { working_days_missed: number; today_hours: number; is_weekend: boolean } =
-          await invoke("get_slug_status");
-        const mood = getSlugMoodFromStreak(status.working_days_missed, status.today_hours, status.is_weekend);
-        setSlugMood(mood);
-        setSlugMessage(getSlugMessage(mood));
-      } catch {
-        // ignore
-      }
+      await loadCreatureState();
     };
     load();
     const interval = setInterval(load, 30000);
@@ -168,9 +166,13 @@ export function Sidebar({ summary }: SidebarProps) {
         </div>
       </div>
 
-      {/* Live slug mood */}
+      {/* Creature habitat */}
       <div className="sidebar-section sidebar-slug">
-        <SlugMood mood={slugMood} message={slugMessage} size="small" />
+        {creatureState && creatureState.lifecycle === "egg" ? (
+          <HatchCeremony state={creatureState} onHatched={loadCreatureState} size="small" />
+        ) : creatureState ? (
+          <PixelHabitat state={creatureState} size="small" />
+        ) : null}
       </div>
     </aside>
   );

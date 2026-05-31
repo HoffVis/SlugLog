@@ -1,4 +1,5 @@
-use sluglog_core::{Database, Entry, NewEntry, Project, SlugStatus, StopResult, TaskArea, Ticket, TicketStatus, WeekSummary};
+use crate::git_commits::{collect_for_date, DayCommitGroup};
+use sluglog_core::{Creature, CreatureState, Database, Entry, NewEntry, Project, SlugStatus, StopResult, TaskArea, Ticket, TicketStatus, WeekSummary};
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
 
@@ -222,6 +223,55 @@ pub fn get_slug_status(db: State<DbState>) -> Result<SlugStatus, String> {
     db.get_slug_status().map_err(|e| e.to_string())
 }
 
+// ===== CREATURES =====
+
+#[tauri::command]
+pub fn get_creature_state(db: State<DbState>) -> Result<CreatureState, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_creature_state().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn hatch_creature(
+    db: State<DbState>,
+    creature_type: String,
+    name: Option<String>,
+) -> Result<Creature, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.hatch_creature(&creature_type, name.as_deref())
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_graveyard(db: State<DbState>) -> Result<Vec<Creature>, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_graveyard().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn name_creature(
+    db: State<DbState>,
+    id: String,
+    name: String,
+) -> Result<(), String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.name_creature(&id, &name).map_err(|e| e.to_string())
+}
+
+// ===== VACATION =====
+
+#[tauri::command]
+pub fn get_vacation_mode(db: State<DbState>) -> Result<bool, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    Ok(db.get_vacation_mode())
+}
+
+#[tauri::command]
+pub fn set_vacation_mode(db: State<DbState>, on: bool) -> Result<(), String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.set_vacation_mode(on).map_err(|e| e.to_string())
+}
+
 // ===== PROJECTS =====
 
 #[tauri::command]
@@ -261,4 +311,13 @@ pub fn update_project(
 pub fn delete_project(db: State<DbState>, id: String) -> Result<(), String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.delete_project(&id).map_err(|e| e.to_string())
+}
+
+// ===== GIT COMMITS (memory aid, not persisted) =====
+
+#[tauri::command]
+pub async fn get_commits_for_date(date: String) -> Result<Vec<DayCommitGroup>, String> {
+    tauri::async_runtime::spawn_blocking(move || collect_for_date(&date))
+        .await
+        .map_err(|e| e.to_string())
 }

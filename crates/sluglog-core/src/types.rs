@@ -125,6 +125,39 @@ pub struct SlugStatus {
     pub is_weekend: bool,
 }
 
+/// A persistent creature (tamagotchi)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Creature {
+    pub id: String,
+    pub creature_type: String,
+    pub name: Option<String>,
+    pub born_at: String,
+    pub died_at: Option<String>,
+    pub cause_of_death: Option<String>,
+    pub generation: i32,
+}
+
+/// Creature lifecycle phase
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum CreatureLifecycle {
+    Egg,
+    Alive,
+    Dead,
+}
+
+/// Full creature state — combines creature lifecycle with slug health
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreatureState {
+    pub lifecycle: CreatureLifecycle,
+    pub creature: Option<Creature>,
+    pub graveyard_count: i32,
+    pub mood: String,
+    pub working_days_missed: i32,
+    pub today_hours: f64,
+    pub is_weekend: bool,
+}
+
 /// Result from stopping a timer — includes slug-budgeted hours
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StopResult {

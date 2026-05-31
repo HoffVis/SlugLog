@@ -75,6 +75,28 @@ export interface SlugStatus {
   is_weekend: boolean;
 }
 
+export interface Creature {
+  id: string;
+  creature_type: string;
+  name: string | null;
+  born_at: string;
+  died_at: string | null;
+  cause_of_death: string | null;
+  generation: number;
+}
+
+export type CreatureLifecycle = "egg" | "alive" | "dead";
+
+export interface CreatureState {
+  lifecycle: CreatureLifecycle;
+  creature: Creature | null;
+  graveyard_count: number;
+  mood: string;
+  working_days_missed: number;
+  today_hours: number;
+  is_weekend: boolean;
+}
+
 export interface StopResult {
   ticket_id: string;
   ticket_title: string;
@@ -107,3 +129,17 @@ export const AREAS: TaskArea[] = [
   "documenting",
   "investigating",
 ];
+
+export interface DayCommit {
+  sha: string;
+  repo: string;
+  message: string;
+  timestamp: string;
+  url: string | null;
+  pushed: boolean;
+}
+
+export interface DayCommitGroup {
+  repo: string;
+  commits: DayCommit[];
+}
