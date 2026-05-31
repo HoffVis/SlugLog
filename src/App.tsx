@@ -156,6 +156,31 @@ export default function App() {
     setWeek(w.week);
   };
 
+  const handleJumpToDate = (dateStr: string) => {
+    const parsed = new Date(dateStr + "T00:00:00");
+    if (Number.isNaN(parsed.getTime())) return;
+    const w = getISOWeek(parsed);
+    setYear(w.year);
+    setWeek(w.week);
+  };
+
+  // Keyboard shortcuts on the sLog view: ←/→ for prev/next week, T for today.
+  // Skip when the user is typing in an input/textarea/contenteditable.
+  useEffect(() => {
+    if (view !== "log") return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target?.isContentEditable) return;
+      if (e.key === "ArrowLeft") handlePrevWeek();
+      else if (e.key === "ArrowRight") handleNextWeek();
+      else if (e.key === "t" || e.key === "T") handleToday();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [view, year, week]);
+
   const handleAddEntry = async (params: {
     description: string;
     hours: number;
@@ -183,6 +208,7 @@ export default function App() {
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}
         onToday={handleToday}
+        onJumpToDate={handleJumpToDate}
         theme={theme}
         onToggleTheme={toggleTheme}
         view={view}

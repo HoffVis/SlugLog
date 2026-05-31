@@ -1,4 +1,5 @@
-import { getWeekMonday, formatShortDate } from "../lib/dates";
+import { useRef } from "react";
+import { getWeekMonday, formatDate, formatShortDate } from "../lib/dates";
 const slugLogo = "/sprites/slug/slug-base.png";
 import "./Header.css";
 
@@ -9,6 +10,7 @@ interface HeaderProps {
   onPrevWeek: () => void;
   onNextWeek: () => void;
   onToday: () => void;
+  onJumpToDate: (date: string) => void;
   theme: "light" | "dark" | "midnight";
   onToggleTheme: () => void;
   view: "log" | "board" | "projects" | "all" | "habitat" | "cli" | "about";
@@ -22,6 +24,7 @@ export function Header({
   onPrevWeek,
   onNextWeek,
   onToday,
+  onJumpToDate,
   theme,
   onToggleTheme,
   view,
@@ -30,6 +33,19 @@ export function Header({
   const monday = getWeekMonday(year, week);
   const friday = new Date(monday);
   friday.setDate(monday.getDate() + 4);
+  const jumpInputRef = useRef<HTMLInputElement>(null);
+
+  const openJumpPicker = () => {
+    const el = jumpInputRef.current;
+    if (!el) return;
+    // Native picker on supporting browsers; fall back to focus.
+    const anyEl = el as HTMLInputElement & { showPicker?: () => void };
+    if (typeof anyEl.showPicker === "function") {
+      anyEl.showPicker();
+    } else {
+      el.focus();
+    }
+  };
 
   return (
     <header className="header">
@@ -90,11 +106,26 @@ export function Header({
           </button>
         </div>
         <div className="week-nav">
-          <button className="week-nav-btn" onClick={onPrevWeek}>&larr;</button>
-          <div className="week-label">
+          <button className="week-nav-btn" onClick={onPrevWeek} title="Previous week (←)">&larr;</button>
+          <button
+            className="week-label week-label-btn"
+            onClick={openJumpPicker}
+            title="Jump to date"
+          >
             Week {week} <span>&middot; {formatShortDate(monday)} – {formatShortDate(friday)}</span>
-          </div>
-          <button className="week-nav-btn" onClick={onNextWeek}>&rarr;</button>
+            <input
+              ref={jumpInputRef}
+              type="date"
+              className="week-jump-input"
+              value={formatDate(monday)}
+              onChange={(e) => {
+                if (e.target.value) onJumpToDate(e.target.value);
+              }}
+              tabIndex={-1}
+              aria-label="Jump to date"
+            />
+          </button>
+          <button className="week-nav-btn" onClick={onNextWeek} title="Next week (→)">&rarr;</button>
         </div>
       </div>
 

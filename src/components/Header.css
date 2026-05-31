@@ -63,24 +63,24 @@
 }
 
 .week-nav-btn {
-  background: none;
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
   color: var(--text-secondary);
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 15px;
   transition: all 0.15s;
 }
 
 .week-nav-btn:hover {
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-  background: var(--bg-surface);
+  border-color: var(--slug-green);
+  color: var(--slug-green);
+  background: var(--slug-green-glow);
 }
 
 .week-label {
@@ -95,6 +95,32 @@
 .week-label span {
   color: var(--text-muted);
   font-weight: 400;
+}
+
+.week-label-btn {
+  position: relative;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.week-label-btn:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-surface);
+}
+
+.week-jump-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+  padding: 0;
 }
 
 .header-right {
