@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { EditableEntryCard } from "./EditableEntryCard";
+import { DayCommits } from "./DayCommits";
 import { AREAS, AREA_LABELS } from "../lib/types";
 import { getProjects } from "../lib/commands";
 import type { Entry, Project } from "../lib/types";
@@ -58,6 +59,7 @@ export function DayDetail({ date, entries, onClose, onUpdate, onCreate }: DayDet
         </div>
         <div className="day-detail-entries">
           <AddEntryInline date={date} onCreate={onCreate} onUpdate={onUpdate} />
+          <DayCommits date={date} />
           {entries.length === 0 ? (
             <div className="day-detail-empty">No entries for this day yet.</div>
           ) : (
