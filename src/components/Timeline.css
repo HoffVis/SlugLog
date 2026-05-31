@@ -107,16 +107,23 @@
 
 .day-node.has-entries { background: var(--text-secondary); }
 
-.day-entries {
+.day-content {
   flex: 1;
   padding: 6px 0 6px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.day-entries {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .day-empty {
-  padding: 12px 0 12px 16px;
+  padding: 6px 0;
   display: flex;
   align-items: center;
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { getAllEntries, toggleSynced } from "../lib/commands";
-import { AREA_LABELS } from "../lib/types";
-import type { Entry, TaskArea } from "../lib/types";
+import { getAllEntries } from "../lib/commands";
+import { EditableEntryCard } from "./EditableEntryCard";
+import type { Entry } from "../lib/types";
 import "./AllEntries.css";
 
 function formatDateHeading(dateStr: string): string {
@@ -94,59 +94,12 @@ export function AllEntries() {
                 </span>
               </div>
               {group.entries.map((entry) => (
-                <AllEntryCard key={entry.id} entry={entry} onUpdate={load} />
+                <EditableEntryCard key={entry.id} entry={entry} onUpdate={load} />
               ))}
             </div>
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-function AllEntryCard({ entry, onUpdate }: { entry: Entry; onUpdate: () => void }) {
-  const areaClass = entry.area ?? "";
-  const areaLabel = entry.area ? AREA_LABELS[entry.area as TaskArea] : null;
-
-  const handleSync = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await toggleSynced(entry.id);
-    onUpdate();
-  };
-
-  return (
-    <div className={`entry-card area-left-${areaClass} ${entry.synced ? "is-synced" : ""}`}>
-      <div className="entry-main">
-        <button
-          className={`entry-sync-btn ${entry.synced ? "synced" : ""}`}
-          onClick={handleSync}
-          title={entry.synced ? "Synced" : "Mark as synced"}
-        >
-          {entry.synced ? "\u2713" : ""}
-        </button>
-        <div className="entry-info">
-          <div className="entry-top-line">
-            {entry.project && (
-              <span className="entry-project">{entry.project}</span>
-            )}
-            {entry.project_number && (
-              <span className="entry-pn">#{entry.project_number}</span>
-            )}
-            {areaLabel && (
-              <span className={`entry-area-tag area-color-${areaClass} area-bg-${areaClass}`}>
-                {areaLabel}
-              </span>
-            )}
-          </div>
-          <div className="entry-desc">{entry.description}</div>
-        </div>
-        <div className="entry-meta">
-          <div className="entry-hours">
-            {entry.hours.toFixed(1)}<span>h</span>
-          </div>
-          <div className="entry-time">{entry.time}</div>
-        </div>
-      </div>
     </div>
   );
 }

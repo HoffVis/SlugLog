@@ -2,6 +2,7 @@ import { getWeekDates, formatDate, formatWeekday, formatShortDate, isToday, isWe
 import { toggleSynced } from "../lib/commands";
 import { AREA_LABELS } from "../lib/types";
 import type { Entry, TaskArea } from "../lib/types";
+import { DayCommits } from "./DayCommits";
 import "./Timeline.css";
 
 interface TimelineProps {
@@ -50,19 +51,22 @@ export function Timeline({ year, week, entries, onDayClick, onUpdate, loading }:
             <div className="day-node-col">
               <div className={`day-node ${dayEntries.length > 0 ? "has-entries" : ""}`} />
             </div>
-            {dayEntries.length > 0 ? (
-              <div className="day-entries">
-                {dayEntries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} onUpdate={onUpdate} />
-                ))}
-              </div>
-            ) : (
-              <div className="day-empty">
-                <span className="day-empty-msg">
-                  {weekend ? "weekend" : "no entries"}
-                </span>
-              </div>
-            )}
+            <div className="day-content">
+              {dayEntries.length > 0 ? (
+                <div className="day-entries">
+                  {dayEntries.map((entry) => (
+                    <EntryCard key={entry.id} entry={entry} onUpdate={onUpdate} />
+                  ))}
+                </div>
+              ) : (
+                <div className="day-empty">
+                  <span className="day-empty-msg">
+                    {weekend ? "weekend" : "no entries"}
+                  </span>
+                </div>
+              )}
+              {!weekend && <DayCommits date={dateStr} />}
+            </div>
           </div>
         );
       })}
